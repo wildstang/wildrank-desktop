@@ -17,7 +17,7 @@ public class WildRank
 	
 	public WildRank()
 	{
-		frame = new JFrame("WildRank v3 Desktop v2");
+		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
 		frame.setPreferredSize(new Dimension(500, 250));
 		frame.add(panel);
