@@ -34,6 +34,18 @@ public class GetEventData extends JPanel implements ActionListener {
 		add(team);
 		add(fetch);
 	}
+	
+	public void getDatas(int i)
+	{
+		System.out.println(eventKeys.get(i) + " data requested." + "\n" + "Downloading event data...");
+		String event = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" +  eventKeys.get(i));
+		String teams = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" +  eventKeys.get(i) + "/teams");
+		String matches = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" +  eventKeys.get(i) + "/matches");
+		System.out.println("Data downloaded! \n" + event + "\n" + teams + "\n" + matches);
+		JSONObject eventjson = new JSONObject(event);
+		JSONArray teamjson = new JSONArray(teams);
+		JSONArray matchjson = new JSONArray(matches);
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -55,7 +67,7 @@ public class GetEventData extends JPanel implements ActionListener {
 							JSONObject currentEvent = teamEvents.getJSONObject(i);
 							eventKeys.add(currentEvent.getString("key"));
 							String shortName;
-							if (currentEvent.has("short_name") && !currentEvent.isNull("short_name")) {
+							if (currentEvent.has("short_name") && !currentEvent.isNull("short_name")){
 								shortName = currentEvent.getString("short_name");
 							} else {
 								shortName = currentEvent.getString("name");
@@ -71,6 +83,16 @@ public class GetEventData extends JPanel implements ActionListener {
 				});
 			} catch (JSONException exception) {
 				exception.printStackTrace();
+			}
+		}
+		else
+		{
+			for(int i = 0; i < eventButtons.size(); i++)
+			{
+				if(eventButtons.get(i) == e.getSource())
+				{
+					getDatas(i);
+				}
 			}
 		}
 	}
