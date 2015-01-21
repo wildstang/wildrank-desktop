@@ -2,8 +2,11 @@ package org.wildstang.wildrank.desktopv2;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -13,6 +16,14 @@ import javax.swing.SwingUtilities;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.couchbase.lite.Database;
+import com.couchbase.lite.Document;
+import com.couchbase.lite.JavaContext;
+import com.couchbase.lite.Manager;
+//import com.couchbase.lite.Database;
+//import com.couchbase.lite.Manager;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GetEventData extends JPanel implements ActionListener {
 	JTextField year;
@@ -38,7 +49,7 @@ public class GetEventData extends JPanel implements ActionListener {
 			System.out.println("Loading shit.");
 			String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/" + year.getText() + "/events");
 			System.out.println("Shit loaded! " + json);
-			
+
 			JSONArray teamEvents = new JSONArray(json);
 			try {
 				SwingUtilities.invokeLater(new Runnable() {
@@ -50,7 +61,7 @@ public class GetEventData extends JPanel implements ActionListener {
 						System.out.println("Processing shit.");
 						for (int i = 0; i < teamEvents.length(); i++) {
 							JSONObject currentEvent = teamEvents.getJSONObject(i);
-							eventKeys.add(currentEvent.getString("key"));
+							eventKeys.add(i, currentEvent.getString("key"));
 							String shortName;
 							if (currentEvent.has("short_name") && !currentEvent.isNull("short_name")) {
 								shortName = currentEvent.getString("short_name");
@@ -69,6 +80,51 @@ public class GetEventData extends JPanel implements ActionListener {
 			} catch (JSONException exception) {
 				exception.printStackTrace();
 			}
+		} else {
+			for (int i = 0; i < eventButtons.size(); i++) {
+				JButton button = eventButtons.get(i);
+				if (e.getSource() == button) {
+					createDatabase(eventKeys.get(i));
+				}
+			}
 		}
+	}
+
+	public void createDatabase(String eventKey) {
+		System.out.println("Creating database with key: " + eventKey);
+
+		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
+
+		try {
+			
+			File file = new File("C:\\Users\\Nathan\\WildRank\\");
+			file.mkdirs();
+			JavaContext context = new JavaContext() {
+				@Override
+				public File getRootDirectory() {
+					return new File("C:\\Users\\Nathan\\WildRank\\");
+				}
+			};
+			Manager manager = new Manager(context, Manager.DEFAULT_OPTIONS);
+			Database database = manager.getDatabase("wildrank");
+
+			JSONArray matches = new JSONArray(json);
+
+			for (int i = 0; i < matches.length(); i++) {
+				String matchString = matches.get(i).toString();
+
+				Map<String, Object> match = new ObjectMapper().readValue(matchString, HashMap.class);
+				System.out.println("Match " + i + ": " + match.toString());
+				Map<String, Object> alliances = (Map<String, Object>) match.get("alliances");
+				Map<String, Object> redAlliance = (Map<String, Object>) alliances.get("red");
+				Object redTeams = redAlliance.get("teams");
+				
+				Document document = database.createDocument();
+				document.putProperties(match);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 }
