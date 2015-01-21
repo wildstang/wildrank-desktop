@@ -4,6 +4,8 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 public class WildRank
 {
@@ -17,6 +19,14 @@ public class WildRank
 	
 	public WildRank()
 	{
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException
+				| IllegalAccessException | UnsupportedLookAndFeelException e)
+		{
+			e.printStackTrace();
+		}
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
 		frame.setPreferredSize(new Dimension(500, 250));

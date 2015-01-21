@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -21,8 +22,6 @@ import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.JavaContext;
 import com.couchbase.lite.Manager;
-//import com.couchbase.lite.Database;
-//import com.couchbase.lite.Manager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GetEventData extends JPanel implements ActionListener {
@@ -34,21 +33,34 @@ public class GetEventData extends JPanel implements ActionListener {
 	List<JButton> eventButtons = new ArrayList<>();
 
 	public GetEventData() {
-		year = new JTextField("Year", 4);
-		team = new JTextField("Team", 4);
+		year = new JTextField(4);
+		team = new JTextField(4);
 		fetch = new JButton("Fetch Events");
 		fetch.addActionListener(this);
+		add(new JLabel("Year: "));
 		add(year);
+		add(new JLabel("Team: "));
 		add(team);
 		add(fetch);
+	}
+
+	public void getDatas(int i) {
+		System.out.println(eventKeys.get(i) + " data requested." + "\n" + "Downloading event data...");
+		String event = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKeys.get(i));
+		String teams = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKeys.get(i) + "/teams");
+		String matches = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKeys.get(i) + "/matches");
+		System.out.println("Data downloaded! \n" + event + "\n" + teams + "\n" + matches);
+		JSONObject eventjson = new JSONObject(event);
+		JSONArray teamjson = new JSONArray(teams);
+		JSONArray matchjson = new JSONArray(matches);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(fetch)) {
-			System.out.println("Loading shit.");
+			System.out.println("Downloading events...");
 			String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/" + year.getText() + "/events");
-			System.out.println("Shit loaded! " + json);
+			System.out.println("Events Downloaded!" + "\n" + json);
 
 			JSONArray teamEvents = new JSONArray(json);
 			try {
@@ -56,9 +68,9 @@ public class GetEventData extends JPanel implements ActionListener {
 
 					@Override
 					public void run() {
-						System.out.println("Removing all shit.");
+						System.out.println("Clearing Panel.");
 						removeAll();
-						System.out.println("Processing shit.");
+						System.out.println("Parsing Events...");
 						for (int i = 0; i < teamEvents.length(); i++) {
 							JSONObject currentEvent = teamEvents.getJSONObject(i);
 							eventKeys.add(i, currentEvent.getString("key"));
@@ -73,7 +85,7 @@ public class GetEventData extends JPanel implements ActionListener {
 							add(eventButton);
 							eventButtons.add(i, eventButton);
 						}
-						System.out.println("Shit has been processed.");
+						System.out.println("Events Parsed!");
 						GetEventData.this.revalidate();
 					}
 				});
@@ -96,7 +108,7 @@ public class GetEventData extends JPanel implements ActionListener {
 		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
 
 		try {
-			
+
 			File file = new File("C:\\Users\\Nathan\\WildRank\\");
 			file.mkdirs();
 			JavaContext context = new JavaContext() {
@@ -118,7 +130,7 @@ public class GetEventData extends JPanel implements ActionListener {
 				Map<String, Object> alliances = (Map<String, Object>) match.get("alliances");
 				Map<String, Object> redAlliance = (Map<String, Object>) alliances.get("red");
 				Object redTeams = redAlliance.get("teams");
-				
+
 				Document document = database.createDocument();
 				document.putProperties(match);
 			}
