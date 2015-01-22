@@ -14,6 +14,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class WildRank implements ActionListener
 {
 	JFrame frame;
+	JFrame userFrame;
 	JPanel panel;
 	JButton users;
 	
@@ -36,7 +37,8 @@ public class WildRank implements ActionListener
 		users.addActionListener(this);
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
-		frame.setPreferredSize(new Dimension(300, 85));
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setPreferredSize(new Dimension(300, 100));
 		frame.add(panel, BorderLayout.PAGE_START);
 		frame.add(users, BorderLayout.PAGE_END);
 		frame.pack();
@@ -49,7 +51,12 @@ public class WildRank implements ActionListener
 	{
 		if(e.getSource().equals(users))
 		{
-			
+			userFrame = new JFrame("WildRank Desktop v2: User Manager");
+			userFrame.setPreferredSize(new Dimension(350, 500));
+			userFrame.setLocation(frame.getX(), frame.getY() + 100);
+			userFrame.add(new ModifyUsers());
+			userFrame.pack();
+			userFrame.setVisible(true);
 		}
 	}
 

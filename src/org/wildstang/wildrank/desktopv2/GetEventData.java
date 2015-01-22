@@ -34,7 +34,6 @@ public class GetEventData extends JPanel implements ActionListener {
 	List<JButton> eventButtons = new ArrayList<>();
 
 	public GetEventData() {
-		setLayout(new GridBagLayout());
 		year = new JTextField(4);
 		team = new JTextField(4);
 		fetch = new JButton("Fetch Events");
