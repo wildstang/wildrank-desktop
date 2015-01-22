@@ -1,16 +1,21 @@
 package org.wildstang.wildrank.desktopv2;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-public class WildRank
+public class WildRank implements ActionListener
 {
 	JFrame frame;
 	JPanel panel;
+	JButton users;
 	
 	public static void main(String[] args)
 	{
@@ -27,13 +32,25 @@ public class WildRank
 		{
 			e.printStackTrace();
 		}
+		users = new JButton("Manage Users");
+		users.addActionListener(this);
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
-		frame.setPreferredSize(new Dimension(500, 250));
-		frame.add(panel);
+		frame.setPreferredSize(new Dimension(300, 85));
+		frame.add(panel, BorderLayout.PAGE_START);
+		frame.add(users, BorderLayout.PAGE_END);
 		frame.pack();
-		frame.setResizable(false);
+		//frame.setResizable(false);
 		frame.setVisible(true);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		if(e.getSource().equals(users))
+		{
+			
+		}
 	}
 
 }
