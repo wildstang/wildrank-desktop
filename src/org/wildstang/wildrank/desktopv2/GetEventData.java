@@ -47,13 +47,9 @@ public class GetEventData extends JPanel implements ActionListener {
 
 	public void getDatas(int i) {
 		System.out.println(eventKeys.get(i) + " data requested." + "\n" + "Downloading event data...");
-		String event = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKeys.get(i));
 		String teams = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKeys.get(i) + "/teams");
-		String matches = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKeys.get(i) + "/matches");
-		System.out.println("Data downloaded! \n" + event + "\n" + teams + "\n" + matches);
-		JSONObject eventjson = new JSONObject(event);
+		System.out.println("Data downloaded! \n" + teams);
 		JSONArray teamjson = new JSONArray(teams);
-		JSONArray matchjson = new JSONArray(matches);
 	}
 
 	public void fetchEvent() {
@@ -110,20 +106,21 @@ public class GetEventData extends JPanel implements ActionListener {
 	public void createDatabase(String eventKey) {
 		System.out.println("Creating database with key: " + eventKey);
 
-		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
+		String matches = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
+		String teams = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/teams");
 
 		try {
 			Database database = DatabaseManager.getInstance().getDatabase();
 
-			JSONArray matches = new JSONArray(json);
+			JSONArray matchesj = new JSONArray(matches);
+			JSONArray teamsj = new JSONArray(teams);
 
-			for (int i = 0; i < matches.length(); i++) {
-				String matchString = matches.get(i).toString();
+			for (int i = 0; i < matchesj.length(); i++) {
+				String matchString = matchesj.get(i).toString();
 
 				Map<String, Object> match = new ObjectMapper().readValue(matchString, HashMap.class);
 				match.put("type", "match");
 				System.out.println("Match " + i + ": " + match.toString());
-
 				// filter non-qualifying matches
 				if (!match.get("comp_level").equals("qm")) {
 					break;
@@ -132,6 +129,17 @@ public class GetEventData extends JPanel implements ActionListener {
 				Document document = database.createDocument();
 				document.putProperties(match);
 			}
+			
+			for (int i = 0; i < teamsj.length(); i++) {
+				String teamString = teamsj.get(i).toString();
+
+				Map<String, Object> team = new ObjectMapper().readValue(teamString, HashMap.class);
+				System.out.println("Team " + i + ": " + team.toString());
+
+				Document document = database.createDocument();
+				document.putProperties(team);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
