@@ -1,5 +1,6 @@
 package org.wildstang.wildrank.desktopv2;
 
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -55,43 +56,48 @@ public class GetEventData extends JPanel implements ActionListener {
 		JSONArray matchjson = new JSONArray(matches);
 	}
 
+	public void fetchEvent()
+	{
+		System.out.println("Downloading events...");
+		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/" + year.getText() + "/events");
+		System.out.println("Events Downloaded!" + "\n" + json);
+
+		JSONArray teamEvents = new JSONArray(json);
+		try {
+			SwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run() {
+					System.out.println("Clearing Panel.");
+					removeAll();
+					System.out.println("Parsing Events...");
+					for (int i = 0; i < teamEvents.length(); i++) {
+						JSONObject currentEvent = teamEvents.getJSONObject(i);
+						eventKeys.add(i, currentEvent.getString("key"));
+						String shortName;
+						if (currentEvent.has("short_name") && !currentEvent.isNull("short_name")) {
+							shortName = currentEvent.getString("short_name");
+						} else {
+							shortName = currentEvent.getString("name");
+						}
+						JButton eventButton = new JButton(shortName);
+						eventButton.addActionListener(GetEventData.this);
+						add(eventButton);
+						eventButtons.add(i, eventButton);
+					}
+					System.out.println("Events Parsed!");
+					GetEventData.this.revalidate();
+				}
+			});
+		} catch (JSONException exception) {
+			exception.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(fetch)) {
-			System.out.println("Downloading events...");
-			String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/" + year.getText() + "/events");
-			System.out.println("Events Downloaded!" + "\n" + json);
-
-			JSONArray teamEvents = new JSONArray(json);
-			try {
-				SwingUtilities.invokeLater(new Runnable() {
-
-					@Override
-					public void run() {
-						System.out.println("Clearing Panel.");
-						removeAll();
-						System.out.println("Parsing Events...");
-						for (int i = 0; i < teamEvents.length(); i++) {
-							JSONObject currentEvent = teamEvents.getJSONObject(i);
-							eventKeys.add(i, currentEvent.getString("key"));
-							String shortName;
-							if (currentEvent.has("short_name") && !currentEvent.isNull("short_name")) {
-								shortName = currentEvent.getString("short_name");
-							} else {
-								shortName = currentEvent.getString("name");
-							}
-							JButton eventButton = new JButton(shortName);
-							eventButton.addActionListener(GetEventData.this);
-							add(eventButton);
-							eventButtons.add(i, eventButton);
-						}
-						System.out.println("Events Parsed!");
-						GetEventData.this.revalidate();
-					}
-				});
-			} catch (JSONException exception) {
-				exception.printStackTrace();
-			}
+			fetchEvent();
 		} else {
 			for (int i = 0; i < eventButtons.size(); i++) {
 				JButton button = eventButtons.get(i);
@@ -108,17 +114,7 @@ public class GetEventData extends JPanel implements ActionListener {
 		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
 
 		try {
-
-			File file = new File("C:\\Users\\Nathan\\WildRank\\");
-			file.mkdirs();
-			JavaContext context = new JavaContext() {
-				@Override
-				public File getRootDirectory() {
-					return new File("C:\\Users\\Nathan\\WildRank\\");
-				}
-			};
-			Manager manager = new Manager(context, Manager.DEFAULT_OPTIONS);
-			Database database = manager.getDatabase("wildrank");
+			Database database = DatabaseManager.getInstance().getDatabase();
 
 			JSONArray matches = new JSONArray(json);
 
@@ -140,6 +136,9 @@ public class GetEventData extends JPanel implements ActionListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		System.out.println("Done!");
+		removeAll();
+		add(new JLabel("Done!"));
+		WildRank.frame.pack();
 	}
 }
