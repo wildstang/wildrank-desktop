@@ -144,6 +144,7 @@ public class GetEventData extends JPanel implements ActionListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		removeAll();
+		add(new JLabel("Done!"));
 	}
 }
