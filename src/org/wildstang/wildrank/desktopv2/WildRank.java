@@ -13,7 +13,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 public class WildRank implements ActionListener
 {
-	JFrame frame;
+	static JFrame frame;
 	JPanel panel;
 	JButton users;
 	
