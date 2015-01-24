@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +17,12 @@ import javax.swing.JPanel;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.JavaContext;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.QueryOptions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ModifyUsers extends JPanel implements ActionListener
@@ -37,7 +40,11 @@ public class ModifyUsers extends JPanel implements ActionListener
 		save.addActionListener(this);
 		add = new JButton("Add Another");
 		add.addActionListener(this);
-		loadUsers();
+		try {
+			loadUsers();
+		} catch (IOException | CouchbaseLiteException e) {
+			e.printStackTrace();
+		}
 		render();
 	}
 	
@@ -55,11 +62,33 @@ public class ModifyUsers extends JPanel implements ActionListener
 		add(save, c);
 	}
 	
-	public void loadUsers()
+	public void loadUsers() throws IOException, CouchbaseLiteException
 	{
-		users.add(new UserRow("715132", "Liam Fruzyna", true));
-		users.add(new UserRow("217002", "Alex Guerra", false));
-		users.add(new UserRow("", "", false));
+		File file = WildRank.file;
+		file.mkdirs();
+		JavaContext context = new JavaContext() {
+			@Override
+			public File getRootDirectory() {
+				return WildRank.file;
+			}
+		};
+		Manager manager = new Manager(context, Manager.DEFAULT_OPTIONS);
+		Database database = manager.getDatabase("wildrank");
+		System.out.println(database.getAllDocs(new QueryOptions()).size() + ", " + database.getDocumentCount());
+		for(int i = 0; i < database.getDocumentCount(); i++)
+		{
+			Document document = (Document) database.getAllDocs(new QueryOptions()).get(i);
+			if(document != null)
+			{
+				Map<String, Object> user = document.getProperties();
+				JSONObject userj = new JSONObject(user.get(HashMap.class));
+				users.add(new UserRow(userj.getString("id"), userj.getString("name"), userj.getBoolean("admin")));
+			}
+			else
+			{
+				System.out.println("Document is null");
+			}
+		}
 	}
 	
 	@Override
