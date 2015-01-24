@@ -57,6 +57,7 @@ public class ModifyUsers extends JPanel implements ActionListener
 		{
 			users.add(new UserRow("", "", false));
 			render();
+			WildRank.userFrame.pack();
 		}
 	}
 
