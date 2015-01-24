@@ -115,12 +115,12 @@ public class GetEventData extends JPanel implements ActionListener {
 
 		try {
 
-			File file = new File("C:\\Users\\Nathan\\WildRank\\");
+			File file = WildRank.file;
 			file.mkdirs();
 			JavaContext context = new JavaContext() {
 				@Override
 				public File getRootDirectory() {
-					return new File("C:\\Users\\Nathan\\WildRank\\");
+					return WildRank.file;
 				}
 			};
 			Manager manager = new Manager(context, Manager.DEFAULT_OPTIONS);
@@ -143,6 +143,9 @@ public class GetEventData extends JPanel implements ActionListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		System.out.println("Done!");
+		removeAll();
+		add(new JLabel("Done!"));
+		WildRank.frame.pack();
 	}
 }
