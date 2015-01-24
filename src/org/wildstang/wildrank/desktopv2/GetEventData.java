@@ -126,11 +126,14 @@ public class GetEventData extends JPanel implements ActionListener {
 				String matchString = matches.get(i).toString();
 
 				Map<String, Object> match = new ObjectMapper().readValue(matchString, HashMap.class);
+				match.put("type", "match");
 				System.out.println("Match " + i + ": " + match.toString());
-				Map<String, Object> alliances = (Map<String, Object>) match.get("alliances");
-				Map<String, Object> redAlliance = (Map<String, Object>) alliances.get("red");
-				Object redTeams = redAlliance.get("teams");
-
+				
+				// filter non-qualifying matches
+				if(!match.get("comp_level").equals("qm")) {
+					break;
+				}
+				
 				Document document = database.createDocument();
 				document.putProperties(match);
 			}
