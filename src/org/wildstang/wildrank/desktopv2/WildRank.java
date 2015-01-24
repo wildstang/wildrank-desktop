@@ -16,9 +16,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class WildRank implements ActionListener
 {
 	static JFrame frame;
+	static JFrame userFrame;
+
 	JPanel panel;
 	JButton users;
-	static File file;
+	static File directory;
 	
 	public static void main(String[] args)
 	{
@@ -39,7 +41,8 @@ public class WildRank implements ActionListener
 		users.addActionListener(this);
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
-		frame.setPreferredSize(new Dimension(300, 85));
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setPreferredSize(new Dimension(300, 100));
 		frame.add(panel, BorderLayout.PAGE_START);
 		frame.add(users, BorderLayout.PAGE_END);
 		frame.pack();
@@ -51,9 +54,9 @@ public class WildRank implements ActionListener
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setDialogTitle("Select the Local location");
 		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
-			file = chooser.getSelectedFile();
+			directory = chooser.getSelectedFile();
 		} else {
-			file = null;
+			directory = null;
 		}
 	}
 
@@ -62,7 +65,12 @@ public class WildRank implements ActionListener
 	{
 		if(e.getSource().equals(users))
 		{
-			
+			userFrame = new JFrame("WildRank Desktop v2: User Manager");
+			userFrame.setPreferredSize(new Dimension(350, 500));
+			userFrame.setLocation(frame.getX(), frame.getY() + 100);
+			userFrame.add(new ModifyUsers());
+			userFrame.pack();
+			userFrame.setVisible(true);
 		}
 	}
 

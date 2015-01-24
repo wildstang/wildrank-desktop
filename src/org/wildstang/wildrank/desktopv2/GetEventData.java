@@ -34,7 +34,6 @@ public class GetEventData extends JPanel implements ActionListener {
 	List<JButton> eventButtons = new ArrayList<>();
 
 	public GetEventData() {
-		setLayout(new GridBagLayout());
 		year = new JTextField(4);
 		team = new JTextField(4);
 		fetch = new JButton("Fetch Events");
@@ -115,17 +114,7 @@ public class GetEventData extends JPanel implements ActionListener {
 		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
 
 		try {
-
-			File file = WildRank.file;
-			file.mkdirs();
-			JavaContext context = new JavaContext() {
-				@Override
-				public File getRootDirectory() {
-					return WildRank.file;
-				}
-			};
-			Manager manager = new Manager(context, Manager.DEFAULT_OPTIONS);
-			Database database = manager.getDatabase("wildrank");
+			Database database = DatabaseManager.getInstance().getDatabase();
 
 			JSONArray matches = new JSONArray(json);
 
