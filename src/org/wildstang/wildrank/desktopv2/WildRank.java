@@ -20,7 +20,7 @@ public class WildRank implements ActionListener
 
 	JPanel panel;
 	JButton users;
-	static File file;
+	static File directory;
 	
 	public static void main(String[] args)
 	{
@@ -54,9 +54,9 @@ public class WildRank implements ActionListener
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setDialogTitle("Select the Local location");
 		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
-			file = chooser.getSelectedFile();
+			directory = chooser.getSelectedFile();
 		} else {
-			file = null;
+			directory = null;
 		}
 	}
 

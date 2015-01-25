@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +23,10 @@ import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.JavaContext;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryOptions;
+import com.couchbase.lite.QueryRow;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ModifyUsers extends JPanel implements ActionListener
@@ -64,31 +68,27 @@ public class ModifyUsers extends JPanel implements ActionListener
 	
 	public void loadUsers() throws IOException, CouchbaseLiteException
 	{
-		File file = WildRank.file;
-		file.mkdirs();
-		JavaContext context = new JavaContext() {
-			@Override
-			public File getRootDirectory() {
-				return WildRank.file;
-			}
-		};
-		Manager manager = new Manager(context, Manager.DEFAULT_OPTIONS);
-		Database database = manager.getDatabase("wildrank");
-		System.out.println(database.getAllDocs(new QueryOptions()).size() + ", " + database.getDocumentCount());
-		for(int i = 0; i < database.getDocumentCount(); i++)
-		{
-			Document document = (Document) database.getAllDocs(new QueryOptions()).get(i);
+		Database database = DatabaseManager.getInstance().getDatabase();
+		Query query = DatabaseManager.getInstance().getAllUsers();
+		QueryEnumerator enumerator = query.run();
+		List<QueryRow> rows = new ArrayList<>();
+        for(Iterator<QueryRow> it = enumerator; it.hasNext(); ) {
+            rows.add(it.next());
+        }
+
+        for(int i = 0; i < rows.size(); i++)
+        {
+        	Document document = rows.get(i).getDocument();
 			if(document != null)
 			{
 				Map<String, Object> user = document.getProperties();
-				JSONObject userj = new JSONObject(user.get(HashMap.class));
-				users.add(new UserRow(userj.getString("id"), userj.getString("name"), userj.getBoolean("admin")));
+				users.add(new UserRow(new User((String) user.get("id"),(String) user.get("name"), document.getId(),(Boolean) user.get("admin"))));
 			}
 			else
 			{
 				System.out.println("Document is null");
 			}
-		}
+        }
 	}
 	
 	@Override
@@ -96,47 +96,44 @@ public class ModifyUsers extends JPanel implements ActionListener
 	{
 		if(e.getSource().equals(add))
 		{
-			users.add(new UserRow("", "", false));
+			users.add(new UserRow());
 			render();
 			WildRank.userFrame.pack();
 		}
 		else if(e.getSource().equals(save))
 		{
-			createDatabase();
+			save();
 		}
 	}
 
-	public void createDatabase() {
+	public void save() {
 		System.out.println("Creating database of users");
-
 
 		try {
 
-			File file = WildRank.file;
-			file.mkdirs();
-			JavaContext context = new JavaContext() {
-				@Override
-				public File getRootDirectory() {
-					return WildRank.file;
-				}
-			};
-			Manager manager = new Manager(context, Manager.DEFAULT_OPTIONS);
-			Database database = manager.getDatabase("wildrank");
+			Database database = DatabaseManager.getInstance().getDatabase();
 
 			for (int i = 0; i < users.size(); i++) {
-				String id = users.get(i).id.getText();
-				String name = users.get(i).name.getText();
-				Boolean admin = users.get(i).admin.isSelected();
-				
-				JSONObject userj = new JSONObject();
-				userj.put("id", id);
-				userj.put("name", name);
-				userj.put("admin", admin);
-				Map<String, Object> user = new ObjectMapper().readValue(userj.toString(), HashMap.class);
-				System.out.println("User " + i + ": " + user.toString());
+				User user = users.get(i).getUser();
 
-				Document document = database.createDocument();
-				document.putProperties(user);
+				Document document;
+				if(user.documentId != null)
+				{
+					document = database.getExistingDocument(user.documentId);
+				}
+				else
+				{
+					document = database.createDocument();
+				}
+				
+				Map<String, Object> usermap = new HashMap<>();
+				usermap.put("id", user.id);
+				usermap.put("name", user.name);
+				usermap.put("admin", user.admin);
+				usermap.put("type", "user");
+				System.out.println("User " + i + ": " + usermap.toString());
+
+				document.putProperties(usermap);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -10,16 +10,36 @@ public class UserRow extends JPanel
 	JTextField id;
 	JTextField name;
 	JCheckBox admin;
+	User user;
 	
-	public UserRow(String id, String name, Boolean admin)
+	public UserRow(User user)
 	{
-		this.id = new JTextField(id, 6);
-		this.name = new JTextField(name, 15);
-		this.admin = new JCheckBox("admin?", admin);
+		this.user = user;
+		id = new JTextField(user.id, 6);
+		name = new JTextField(user.name, 15);
+		admin = new JCheckBox("admin?", user.admin);
 		add(new JLabel("ID:"));
-		add(this.id);
+		add(id);
 		add(new JLabel("Name:"));
-		add(this.name);
-		add(this.admin);
+		add(name);
+		add(admin);
+	}
+	
+	public UserRow()
+	{
+		user = new User();
+		id = new JTextField("", 6);
+		name = new JTextField("", 15);
+		admin = new JCheckBox("admin?");
+		add(new JLabel("ID:"));
+		add(id);
+		add(new JLabel("Name:"));
+		add(name);
+		add(admin);
+	}
+	
+	public User getUser()
+	{
+		return new User(id.getText(), name.getText(), user.documentId, admin.isSelected());
 	}
 }
