@@ -114,17 +114,7 @@ public class GetEventData extends JPanel implements ActionListener {
 		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
 
 		try {
-
-			File file = WildRank.directory;
-			file.mkdirs();
-			JavaContext context = new JavaContext() {
-				@Override
-				public File getRootDirectory() {
-					return WildRank.directory;
-				}
-			};
-			Manager manager = new Manager(context, Manager.DEFAULT_OPTIONS);
-			Database database = manager.getDatabase("wildrank");
+			Database database = DatabaseManager.getInstance().getDatabase();
 
 			JSONArray matches = new JSONArray(json);
 
