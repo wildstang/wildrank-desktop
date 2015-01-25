@@ -32,7 +32,7 @@
 	<classpathentry kind="lib" path="libs/commons-io-2.0.1.jar"/>
 	<classpathentry kind="lib" path="libs/lib/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="libs/lib/commons-logging-1.1.3.jar"/>
-	<classpathentry kind="lib" path="libs/lib/couchbase-lite-java-core.jar"/>
+	<classpathentry kind="lib" path="libs/lib/couchbase-lite-java-core.jar" sourcepath="libs/couchbase-lite-java-core-master-sources.jar"/>
 	<classpathentry kind="lib" path="libs/lib/couchbase-lite-java-native.jar"/>
 	<classpathentry kind="lib" path="libs/lib/httpclient-4.0-beta1.jar"/>
 	<classpathentry kind="lib" path="libs/lib/httpcore-4.0-beta2.jar"/>

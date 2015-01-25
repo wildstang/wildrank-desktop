@@ -13,28 +13,22 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-public class WildRank implements ActionListener
-{
+public class WildRank implements ActionListener {
 	static JFrame frame;
 	static JFrame userFrame;
 
 	JPanel panel;
 	JButton users;
 	static File directory;
-	
-	public static void main(String[] args)
-	{
+
+	public static void main(String[] args) {
 		new WildRank();
 	}
-	
-	public WildRank()
-	{
-		try
-		{
+
+	public WildRank() {
+		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException
-				| IllegalAccessException | UnsupportedLookAndFeelException e)
-		{
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
 		users = new JButton("Manage Users");
@@ -46,7 +40,7 @@ public class WildRank implements ActionListener
 		frame.add(panel, BorderLayout.PAGE_START);
 		frame.add(users, BorderLayout.PAGE_END);
 		frame.pack();
-		//frame.setResizable(false);
+		// frame.setResizable(false);
 		frame.setVisible(true);
 		JFileChooser chooser = new JFileChooser();
 		File startFile = new File(System.getProperty("user.home"));
@@ -61,10 +55,8 @@ public class WildRank implements ActionListener
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e)
-	{
-		if(e.getSource().equals(users))
-		{
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource().equals(users)) {
 			userFrame = new JFrame("WildRank Desktop v2: User Manager");
 			userFrame.setPreferredSize(new Dimension(350, 500));
 			userFrame.setLocation(frame.getX(), frame.getY() + 100);

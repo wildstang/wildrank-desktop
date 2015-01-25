@@ -15,11 +15,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
  * ------
  * A bunch of things that are used throughout the app
  */
-public class Utils
-{
+public class Utils {
 	/*
-	 * getJsonFromUrl
-	 * downloads json from a given url and saves it to the data base
+	 * getJsonFromUrl downloads json from a given url and saves it to the data base
 	 */
 	public static String getJsonFromUrl(String url) {
 		HttpClient httpclient = HttpClientBuilder.create().build();

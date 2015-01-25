@@ -5,15 +5,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class UserRow extends JPanel
-{
+public class UserRow extends JPanel {
 	JTextField id;
 	JTextField name;
 	JCheckBox admin;
 	User user;
-	
-	public UserRow(User user)
-	{
+
+	public UserRow(User user) {
 		this.user = user;
 		id = new JTextField(user.id, 6);
 		name = new JTextField(user.name, 15);
@@ -24,9 +22,8 @@ public class UserRow extends JPanel
 		add(name);
 		add(admin);
 	}
-	
-	public UserRow()
-	{
+
+	public UserRow() {
 		user = new User();
 		id = new JTextField("", 6);
 		name = new JTextField("", 15);
@@ -37,9 +34,8 @@ public class UserRow extends JPanel
 		add(name);
 		add(admin);
 	}
-	
-	public User getUser()
-	{
+
+	public User getUser() {
 		return new User(id.getText(), name.getText(), user.documentId, admin.isSelected());
 	}
 }

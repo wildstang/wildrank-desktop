@@ -52,8 +52,7 @@ public class GetEventData extends JPanel implements ActionListener {
 		JSONArray teamjson = new JSONArray(teams);
 	}
 
-	public void fetchEvent()
-	{
+	public void fetchEvent() {
 		System.out.println("Downloading events...");
 		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/" + year.getText() + "/events");
 		System.out.println("Events Downloaded!" + "\n" + json);
@@ -89,7 +88,7 @@ public class GetEventData extends JPanel implements ActionListener {
 			exception.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(fetch)) {
@@ -120,7 +119,12 @@ public class GetEventData extends JPanel implements ActionListener {
 				String matchString = matchesj.get(i).toString();
 
 				Map<String, Object> match = new ObjectMapper().readValue(matchString, HashMap.class);
+				match.put("type", "match");
 				System.out.println("Match " + i + ": " + match.toString());
+				// filter non-qualifying matches
+				if (!match.get("comp_level").equals("qm")) {
+					break;
+				}
 
 				Document document = database.createDocument();
 				document.putProperties(match);
