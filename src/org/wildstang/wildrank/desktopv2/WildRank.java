@@ -36,8 +36,8 @@ public class WildRank implements ActionListener {
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setPreferredSize(new Dimension(300, 100));
-		frame.add(panel, BorderLayout.PAGE_START);
+		frame.setPreferredSize(new Dimension(300, 135));
+		frame.add(panel, BorderLayout.CENTER);
 		frame.add(users, BorderLayout.PAGE_END);
 		frame.pack();
 		// frame.setResizable(false);

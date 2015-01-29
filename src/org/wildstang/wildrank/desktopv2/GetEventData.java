@@ -1,6 +1,10 @@
 package org.wildstang.wildrank.desktopv2;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -11,8 +15,11 @@ import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import org.json.JSONArray;
@@ -29,9 +36,10 @@ public class GetEventData extends JPanel implements ActionListener {
 	JTextField year;
 	JTextField team;
 	JButton fetch;
+	JList events;
+	Boolean eventFetched = false;
 
 	List<String> eventKeys = new ArrayList<>();
-	List<JButton> eventButtons = new ArrayList<>();
 
 	public GetEventData() {
 		year = new JTextField(4);
@@ -62,25 +70,38 @@ public class GetEventData extends JPanel implements ActionListener {
 			SwingUtilities.invokeLater(new Runnable() {
 
 				@Override
-				public void run() {
+				public void run()
+				{
 					System.out.println("Clearing Panel.");
 					removeAll();
+					List<String> eventStrings = new ArrayList<>();
 					System.out.println("Parsing Events...");
-					for (int i = 0; i < teamEvents.length(); i++) {
+					for (int i = 0; i < teamEvents.length(); i++)
+					{
 						JSONObject currentEvent = teamEvents.getJSONObject(i);
 						eventKeys.add(i, currentEvent.getString("key"));
 						String shortName;
-						if (currentEvent.has("short_name") && !currentEvent.isNull("short_name")) {
+						if (currentEvent.has("short_name") && !currentEvent.isNull("short_name"))
+						{
 							shortName = currentEvent.getString("short_name");
-						} else {
+						}
+						else
+						{
 							shortName = currentEvent.getString("name");
 						}
-						JButton eventButton = new JButton(shortName);
-						eventButton.addActionListener(GetEventData.this);
-						add(eventButton);
-						eventButtons.add(i, eventButton);
+						eventStrings.add(shortName);
 					}
+					events = new JList(eventStrings.toArray());
+					events.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+					events.setLayoutOrientation(JList.VERTICAL_WRAP);
+					events.setVisibleRowCount(-1);
+					JScrollPane listScroller = new JScrollPane(events);
+					listScroller.setPreferredSize(new Dimension(280, 35));
+					listScroller.setViewportView(events);
 					System.out.println("Events Parsed!");
+					fetch.setText("Download");
+					add(listScroller);
+					add(fetch);
 					GetEventData.this.revalidate();
 				}
 			});
@@ -91,14 +112,16 @@ public class GetEventData extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource().equals(fetch)) {
-			fetchEvent();
-		} else {
-			for (int i = 0; i < eventButtons.size(); i++) {
-				JButton button = eventButtons.get(i);
-				if (e.getSource() == button) {
-					createDatabase(eventKeys.get(i));
-				}
+		if (e.getSource().equals(fetch))
+		{
+			if(eventFetched)
+			{
+				createDatabase(eventKeys.get(events.getSelectedIndex()));
+			}
+			else
+			{
+				eventFetched = true;
+				fetchEvent();
 			}
 		}
 	}
@@ -147,5 +170,6 @@ public class GetEventData extends JPanel implements ActionListener {
 		removeAll();
 		add(new JLabel("Done!"));
 		WildRank.frame.pack();
+		GetEventData.this.revalidate();
 	}
 }
