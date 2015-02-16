@@ -27,6 +27,7 @@ import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryOptions;
 import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.UnsavedRevision;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ModifyUsers extends JPanel implements ActionListener {
@@ -63,7 +64,6 @@ public class ModifyUsers extends JPanel implements ActionListener {
 	}
 
 	public void loadUsers() throws IOException, CouchbaseLiteException {
-		Database database = DatabaseManager.getInstance().getDatabase();
 		Query query = DatabaseManager.getInstance().getAllUsers();
 		QueryEnumerator enumerator = query.run();
 		List<QueryRow> rows = new ArrayList<>();
@@ -102,14 +102,7 @@ public class ModifyUsers extends JPanel implements ActionListener {
 
 			for (int i = 0; i < users.size(); i++) {
 				User user = users.get(i).getUser();
-
-				Document document;
-				if (user.documentId != null) {
-					document = database.getExistingDocument(user.documentId);
-				} else {
-					document = database.createDocument();
-				}
-
+				
 				Map<String, Object> usermap = new HashMap<>();
 				usermap.put("id", user.id);
 				usermap.put("name", user.name);
@@ -117,8 +110,24 @@ public class ModifyUsers extends JPanel implements ActionListener {
 				usermap.put("type", "user");
 				System.out.println("User " + i + ": " + usermap.toString());
 
-				document.putProperties(usermap);
+				if (user.documentId != null) {
+					Document document = database.getExistingDocument(user.documentId);
+					UnsavedRevision revision = document.createRevision();
+			        revision.setProperties(usermap);
+			        revision.save();
+				} else {
+					Document document = database.createDocument();
+					document.putProperties(usermap);
+				}
 			}
+			
+			Query allDocsQuery = database.createAllDocumentsQuery();
+	        QueryEnumerator result = allDocsQuery.run();
+	        for (Iterator<QueryRow> it = result; it.hasNext(); ) {
+	            QueryRow row = it.next();
+	            Document doc = row.getDocument();
+	            System.out.println("Document contents: " + doc.getProperties());
+	        }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
