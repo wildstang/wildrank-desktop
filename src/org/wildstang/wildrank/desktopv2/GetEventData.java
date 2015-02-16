@@ -123,7 +123,8 @@ public class GetEventData extends JPanel implements ActionListener {
 				System.out.println("Match " + i + ": " + match.toString());
 				// filter non-qualifying matches
 				if (!match.get("comp_level").equals("qm")) {
-					break;
+					System.out.println("Non-qual match!");
+					continue;
 				}
 
 				Document document = database.createDocument();
@@ -134,6 +135,7 @@ public class GetEventData extends JPanel implements ActionListener {
 				String teamString = teamsj.get(i).toString();
 
 				Map<String, Object> team = new ObjectMapper().readValue(teamString, HashMap.class);
+				team.put("type", "team");
 				System.out.println("Team " + i + ": " + team.toString());
 
 				Document document = database.createDocument();

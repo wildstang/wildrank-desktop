@@ -60,4 +60,9 @@ public class DatabaseManager {
 		query.setDescending(false);
 		return query;
 	}
+	
+	public void saveDatabase() {
+		database.close();
+		database.open();
+	}
 }
