@@ -4,7 +4,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,26 +16,23 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
-import com.couchbase.lite.JavaContext;
-import com.couchbase.lite.Manager;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
-import com.couchbase.lite.QueryOptions;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.UnsavedRevision;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ModifyUsers extends JPanel implements ActionListener {
 	JButton save;
 	JButton add;
+	JButton read;
+	File file;
 	GridBagConstraints c;
 
 	List<UserRow> users = new ArrayList<UserRow>();
@@ -43,6 +43,8 @@ public class ModifyUsers extends JPanel implements ActionListener {
 		save.addActionListener(this);
 		add = new JButton("Add Another");
 		add.addActionListener(this);
+		read = new JButton("Read from CSV");
+		read.addActionListener(this);
 		try {
 			loadUsers();
 		} catch (IOException | CouchbaseLiteException e) {
@@ -52,7 +54,10 @@ public class ModifyUsers extends JPanel implements ActionListener {
 	}
 
 	public void render() {
+		removeAll();
 		c = new GridBagConstraints();
+		add(read, c);
+		c.gridy++;
 		for (int i = 0; i < users.size(); i++) {
 			c.gridy++;
 			add(users.get(i), c);
@@ -75,7 +80,7 @@ public class ModifyUsers extends JPanel implements ActionListener {
 			Document document = rows.get(i).getDocument();
 			if (document != null) {
 				Map<String, Object> user = document.getProperties();
-				users.add(new UserRow(new User((String) user.get("id"), (String) user.get("name"), document.getId(), (Boolean) user.get("admin"))));
+				users.add(new UserRow(new User((String) user.get("id"), (String) user.get("name"), (Boolean) user.get("admin"))));
 			} else {
 				System.out.println("Document is null");
 			}
@@ -90,6 +95,30 @@ public class ModifyUsers extends JPanel implements ActionListener {
 			WildRank.userFrame.pack();
 		} else if (e.getSource().equals(save)) {
 			save();
+		}
+		else if(e.getSource().equals(read))
+		{
+			JFileChooser chooser = new JFileChooser();
+			File startFile = new File(System.getProperty("user.home"));
+			chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
+			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			chooser.setDialogTitle("Select the Local location");
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV Files", "csv");
+			chooser.setFileFilter(filter);
+			if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				file = chooser.getSelectedFile();
+				try
+				{
+					readFromCSV();
+				}
+				catch (IOException e1)
+				{
+					e1.printStackTrace();
+				}
+			} else {
+				file = null;
+			}
+			render();
 		}
 	}
 
@@ -110,15 +139,10 @@ public class ModifyUsers extends JPanel implements ActionListener {
 				usermap.put("type", "user");
 				System.out.println("User " + i + ": " + usermap.toString());
 
-				if (user.documentId != null) {
-					Document document = database.getExistingDocument(user.documentId);
-					UnsavedRevision revision = document.createRevision();
-			        revision.setProperties(usermap);
-			        revision.save();
-				} else {
-					Document document = database.createDocument();
-					document.putProperties(usermap);
-				}
+				Document document = database.getDocument("user:" + user.id);
+				UnsavedRevision revision = document.createRevision();
+		        revision.setProperties(usermap);
+		        revision.save();
 			}
 			
 			Query allDocsQuery = database.createAllDocumentsQuery();
@@ -132,6 +156,26 @@ public class ModifyUsers extends JPanel implements ActionListener {
 			e.printStackTrace();
 		}
 
+	}
+	
+	public void readFromCSV() throws IOException
+	{
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		String line;
+		List<String[]> rawUsers = new ArrayList<>(); 
+		while((line = br.readLine()) != null)
+		{
+			rawUsers.add(line.split(","));
+		}
+		br.close();
+		users.clear();
+		for(int i = 0; i < rawUsers.size(); i++)
+		{
+			String name = rawUsers.get(i)[1].replace("\"", "");
+			String id = rawUsers.get(i)[0].replace("\"", "");
+			Boolean admin = Boolean.parseBoolean(rawUsers.get(i)[2].replace("\"", ""));
+			users.add(new UserRow(new User(name, id, admin)));
+		}
 	}
 
 }

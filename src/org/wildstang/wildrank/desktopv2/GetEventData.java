@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,10 @@ import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.JavaContext;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.UnsavedRevision;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GetEventData extends JPanel implements ActionListener {
@@ -53,13 +58,6 @@ public class GetEventData extends JPanel implements ActionListener {
 		add(fetch);
 	}
 
-	public void getDatas(int i) {
-		System.out.println(eventKeys.get(i) + " data requested." + "\n" + "Downloading event data...");
-		String teams = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKeys.get(i) + "/teams");
-		System.out.println("Data downloaded! \n" + teams);
-		JSONArray teamjson = new JSONArray(teams);
-	}
-
 	public void fetchEvent() {
 		System.out.println("Downloading events...");
 		String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/" + year.getText() + "/events");
@@ -70,23 +68,19 @@ public class GetEventData extends JPanel implements ActionListener {
 			SwingUtilities.invokeLater(new Runnable() {
 
 				@Override
-				public void run()
-				{
+				public void run() {
 					System.out.println("Clearing Panel.");
 					removeAll();
 					List<String> eventStrings = new ArrayList<>();
 					System.out.println("Parsing Events...");
-					for (int i = 0; i < teamEvents.length(); i++)
-					{
+					for (int i = 0; i < teamEvents.length(); i++) {
 						JSONObject currentEvent = teamEvents.getJSONObject(i);
 						eventKeys.add(i, currentEvent.getString("key"));
 						String shortName;
-						if (currentEvent.has("short_name") && !currentEvent.isNull("short_name"))
-						{
+						if (currentEvent.has("short_name") && !currentEvent.isNull("short_name")) {
 							shortName = currentEvent.getString("short_name");
 						}
-						else
-						{
+						else {
 							shortName = currentEvent.getString("name");
 						}
 						eventStrings.add(shortName);
@@ -105,21 +99,19 @@ public class GetEventData extends JPanel implements ActionListener {
 					GetEventData.this.revalidate();
 				}
 			});
-		} catch (JSONException exception) {
-			exception.printStackTrace();
+		}
+		catch (JSONException e) {
+			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource().equals(fetch))
-		{
-			if(eventFetched)
-			{
+		if (e.getSource().equals(fetch)) {
+			if (eventFetched) {
 				createDatabase(eventKeys.get(events.getSelectedIndex()));
 			}
-			else
-			{
+			else {
 				eventFetched = true;
 				fetchEvent();
 			}
@@ -150,10 +142,12 @@ public class GetEventData extends JPanel implements ActionListener {
 					continue;
 				}
 
-				Document document = database.createDocument();
-				document.putProperties(match);
+				Document document = database.getDocument("match:" + matchString);
+				UnsavedRevision revision = document.createRevision();
+		        revision.setProperties(match);
+		        revision.save();
 			}
-			
+
 			for (int i = 0; i < teamsj.length(); i++) {
 				String teamString = teamsj.get(i).toString();
 
@@ -161,13 +155,29 @@ public class GetEventData extends JPanel implements ActionListener {
 				team.put("type", "team");
 				System.out.println("Team " + i + ": " + team.toString());
 
-				Document document = database.createDocument();
-				document.putProperties(team);
+				Document document = database.getDocument("team" + teamString);
+				UnsavedRevision revision = document.createRevision();
+		        revision.setProperties(team);
+		        revision.save();
 			}
-			
-		} catch (Exception e) {
+
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
+		try {
+			Query allDocsQuery = DatabaseManager.getInstance().getDatabase().createAllDocumentsQuery();
+			QueryEnumerator result = allDocsQuery.run();
+			for (Iterator<QueryRow> it = result; it.hasNext();) {
+				QueryRow row = it.next();
+				Document doc = row.getDocument();
+				System.out.println("Document contents: " + doc.getProperties());
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		System.out.println("Done!");
 		removeAll();
 		add(new JLabel("Done!"));

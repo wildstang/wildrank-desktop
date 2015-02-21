@@ -36,6 +36,6 @@ public class UserRow extends JPanel {
 	}
 
 	public User getUser() {
-		return new User(id.getText(), name.getText(), user.documentId, admin.isSelected());
+		return new User(id.getText(), name.getText(), admin.isSelected());
 	}
 }

@@ -46,7 +46,7 @@ public class WildRank implements ActionListener {
 		File startFile = new File(System.getProperty("user.home"));
 		chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setDialogTitle("Select the Local location");
+		chooser.setDialogTitle("Select the flash drive location");
 		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
 			directory = chooser.getSelectedFile();
 		} else {
@@ -58,7 +58,7 @@ public class WildRank implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(users)) {
 			userFrame = new JFrame("WildRank Desktop v2: User Manager");
-			userFrame.setPreferredSize(new Dimension(350, 500));
+			userFrame.setPreferredSize(new Dimension(400, 500));
 			userFrame.setLocation(frame.getX(), frame.getY() + 100);
 			userFrame.add(new ModifyUsers());
 			userFrame.pack();
