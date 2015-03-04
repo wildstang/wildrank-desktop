@@ -155,7 +155,7 @@ public class GetEventData extends JPanel implements ActionListener {
 				team.put("type", "team");
 				System.out.println("Team " + i + ": " + team.toString());
 
-				Document document = database.getDocument("team" + teamString);
+				Document document = database.getDocument("team:" + teamString);
 				UnsavedRevision revision = document.createRevision();
 		        revision.setProperties(team);
 		        revision.save();
