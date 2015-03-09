@@ -153,9 +153,9 @@ public class GetEventData extends JPanel implements ActionListener {
 
 				Map<String, Object> team = new ObjectMapper().readValue(teamString, HashMap.class);
 				team.put("type", "team");
-				System.out.println("Team " + i + ": " + team.toString());
+				System.out.println("team key:" + team.get("key"));
 
-				Document document = database.getDocument("team:" + teamString);
+				Document document = database.getDocument("team:" + team.get("key"));
 				UnsavedRevision revision = document.createRevision();
 		        revision.setProperties(team);
 		        revision.save();
