@@ -171,10 +171,10 @@ public class ModifyUsers extends JPanel implements ActionListener {
 		users.clear();
 		for(int i = 0; i < rawUsers.size(); i++)
 		{
-			String name = rawUsers.get(i)[1].replace("\"", "");
 			String id = rawUsers.get(i)[0].replace("\"", "");
+			String name = rawUsers.get(i)[1].replace("\"", "");
 			Boolean admin = Boolean.parseBoolean(rawUsers.get(i)[2].replace("\"", ""));
-			users.add(new UserRow(new User(name, id, admin)));
+			users.add(new UserRow(new User(id, name, admin)));
 		}
 	}
 
