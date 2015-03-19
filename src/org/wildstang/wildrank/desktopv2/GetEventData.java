@@ -148,7 +148,6 @@ public class GetEventData extends JPanel implements ActionListener {
 				Document document = database.getExistingDocument(documentName);
 				if(document != null)
 				{
-					database.getExistingDocument(documentName).getProperties().clear();
 					System.out.println("Match document exists... clearing");
 				}
 				else
@@ -173,7 +172,6 @@ public class GetEventData extends JPanel implements ActionListener {
 				Document document = database.getExistingDocument(documentName);
 				if(document != null)
 				{
-					database.getExistingDocument(documentName).getProperties().clear();
 					System.out.println("Team document exists... clearing");
 				}
 				else
