@@ -141,8 +141,21 @@ public class GetEventData extends JPanel implements ActionListener {
 					System.out.println("Non-qual match!");
 					continue;
 				}
-
-				Document document = database.getDocument("match:" + matchString);
+				String matchKey = (String) match.get("key");
+				System.out.println("match key:" + matchKey);
+				String documentName = "match:" + matchKey;
+				
+				Document document = database.getExistingDocument(documentName);
+				if(document != null)
+				{
+					database.getExistingDocument(documentName).getProperties().clear();
+					System.out.println("Match document exists... clearing");
+				}
+				else
+				{
+					document = database.getDocument(documentName);
+					System.out.println("Match document doesn't exist... creating new document");
+				}
 				UnsavedRevision revision = document.createRevision();
 		        revision.setProperties(match);
 		        revision.save();
@@ -153,9 +166,21 @@ public class GetEventData extends JPanel implements ActionListener {
 
 				Map<String, Object> team = new ObjectMapper().readValue(teamString, HashMap.class);
 				team.put("type", "team");
-				System.out.println("team key:" + team.get("key"));
+				String teamKey = (String) team.get("key");
+				System.out.println("team key:" + teamKey);
+				String documentName = "team:" + teamKey;
 
-				Document document = database.getDocument("team:" + team.get("key"));
+				Document document = database.getExistingDocument(documentName);
+				if(document != null)
+				{
+					database.getExistingDocument(documentName).getProperties().clear();
+					System.out.println("Team document exists... clearing");
+				}
+				else
+				{
+					document = database.getDocument(documentName);
+					System.out.println("Team document doesn't exist... creating new document");
+				}
 				UnsavedRevision revision = document.createRevision();
 		        revision.setProperties(team);
 		        revision.save();
