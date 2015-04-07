@@ -34,6 +34,7 @@ import com.couchbase.lite.UnsavedRevision;
 public class WildRank implements ActionListener {
 	static JFrame frame;
 	static JFrame userFrame;
+	static JFrame csvFrame;
 
 	JPanel panel;
 	JButton users;
@@ -100,14 +101,14 @@ public class WildRank implements ActionListener {
 		}
 		else if(e.getSource().equals(csv))
 		{
-			try
-			{
-				writeCSV();
-			}
-			catch (IOException | CouchbaseLiteException e1)
-			{
-				e1.printStackTrace();
-			}
+			csvFrame = new JFrame("WildRank Desktop v2: CSV Writer");
+			csvFrame.setPreferredSize(new Dimension(300, 150));
+			csvFrame.setLocation(5, 5);
+			MakeCSV csvPanel;
+			csvFrame.add(csvPanel = new MakeCSV());
+			csvFrame.pack();
+			csvFrame.setVisible(true);
+			csvPanel.run();
 		}
 	}
 
@@ -150,146 +151,5 @@ public class WildRank implements ActionListener {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public void writeCSV() throws IOException, CouchbaseLiteException
-	{
-		//warning this is sketchy as hell especially with match results
-		Database database = DatabaseManager.getInstance().getDatabase();
-		Query allDocsQuery = database.createAllDocumentsQuery();
-		QueryEnumerator result = allDocsQuery.run();
-		String type = "";
-		BufferedWriter bw = new BufferedWriter(new FileWriter("blank.csv"));
-		for (Iterator<QueryRow> it = result; it.hasNext();)
-		{
-			QueryRow row = it.next();
-			Document doc = row.getDocument();
-			// System.out.println("Document contents: " + doc.getProperties());
-			List<String> subKeys = new ArrayList<>();
-			if (doc.getProperty("type") != null)
-			{
-				//team and match are broken
-				if (!doc.getProperty("type").equals("match") && !doc.getProperty("type").equals("team"))
-				{
-					Iterator<Entry<String, Object>> props = doc.getProperties().entrySet().iterator();
-					Entry<String, Object> prop = props.next();
-					if (!(((String) doc.getProperty("type")).equals(type)))
-					{
-						subKeys = new ArrayList<>();
-						bw.close();
-						type = (String) doc.getProperty("type");
-						bw = new BufferedWriter(new FileWriter(type + ".csv"));
-						while (props.hasNext())
-						{
-							String key = prop.getKey();
-							Object value = prop.getValue();
-							bw.write(key + ",");
-							if(value instanceof Map<?,?>)
-							{
-								Map<String, Object> subMap = (Map<String, Object>)value;
-								Iterator<Entry<String, Object>> subProps = subMap.entrySet().iterator();
-								Entry<String, Object> subProp = props.next();
-								while (subProps.hasNext())
-								{
-									String subKey = subProp.getKey();
-									Object subValue = subProp.getValue();
-									subProp = subProps.next();
-									boolean found = false;
-									for(int i = 0; i < subKeys.size(); i++)
-									{
-										if(subKeys.get(i).equals(subKey))
-										{
-											found = true;
-										}
-									}
-									if(!found)
-									{
-										subKeys.add(subKey);
-										bw.write(subKey + ",");
-									}
-								}
-							}
-							prop = props.next();
-						}
-						bw.write("\n");
-
-					}
-					else
-					{
-						bw = new BufferedWriter(new FileWriter(type + ".csv"));
-						while (props.hasNext())
-						{
-							String key = prop.getKey();
-							Object value = prop.getValue();
-							bw.write(key + ",");
-							if(value instanceof Map<?,?>)
-							{
-								Map<String, Object> subMap = (Map<String, Object>)value;
-								Iterator<Entry<String, Object>> subProps = subMap.entrySet().iterator();
-								Entry<String, Object> subProp = props.next();
-								while (subProps.hasNext())
-								{
-									String subKey = subProp.getKey();
-									Object subValue = subProp.getValue();
-									subProp = subProps.next();
-									boolean found = false;
-									for(int i = 0; i < subKeys.size(); i++)
-									{
-										if(subKeys.get(i).equals(subKey))
-										{
-											found = true;
-										}
-									}
-									if(!found)
-									{
-										subKeys.add(subKey);
-										bw.write(subKey + ",");
-									}
-								}
-							}
-							prop = props.next();
-						}
-					}
-
-					props = doc.getProperties().entrySet().iterator();
-					prop = props.next();
-					while (props.hasNext())
-					{
-						String key = prop.getKey();
-						Object value = prop.getValue();
-						if (value != null)
-						{
-							String string = value.toString().replace(",", ";");
-							bw.write(string + ",");
-							System.out.println("Writing: " + string);
-							if(value instanceof Map<?,?>)
-							{
-								System.out.println("Writing Map");
-								Map<String, Object> subMap = (Map<String, Object>)value;
-								for(int i = 0; i < subKeys.size(); i++)
-								{
-									if(subMap.get(subKeys.get(i)) != null)
-									{
-										bw.write(subMap.get(subKeys.get(i)).toString() + ",");
-									}
-									else
-									{
-										bw.write(",");
-									}
-								}
-							}
-							prop = props.next();
-						}
-						else
-						{
-							System.out.println(doc.getProperty("type") + ": " + key + " is null");
-						}
-					}
-					bw.write("\n");
-					bw.flush();
-				}
-			}
-		}
-		bw.close();
 	}
 }
