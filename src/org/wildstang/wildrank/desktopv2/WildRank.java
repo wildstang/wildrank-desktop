@@ -4,10 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +44,8 @@ public class WildRank implements ActionListener {
 	JButton users;
 	JButton fixNotes;
 	JButton csv;
+	JButton addPictures;
+	
 	static File directory;
 
 	public static void main(String[] args) {
@@ -59,12 +65,15 @@ public class WildRank implements ActionListener {
 		fixNotes.addActionListener(this);
 		csv = new JButton("Write CSV");
 		csv.addActionListener(this);
+		addPictures = new JButton("Add Pictures");
+		addPictures.addActionListener(this);
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setPreferredSize(new Dimension(300, 150));
 		JPanel top = new JPanel();
 		top.add(fixNotes, BorderLayout.WEST);
+		top.add(addPictures, BorderLayout.CENTER);
 		top.add(csv, BorderLayout.EAST);
 		frame.add(top, BorderLayout.PAGE_START);
 		frame.add(panel, BorderLayout.CENTER);
@@ -109,6 +118,41 @@ public class WildRank implements ActionListener {
 			csvFrame.pack();
 			csvFrame.setVisible(true);
 			csvPanel.run();
+		}
+		else if(e.getSource().equals(addPictures))
+		{
+			JFileChooser chooser = new JFileChooser();
+			File startFile = new File(System.getProperty("user.home"));
+			chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			chooser.setDialogTitle("Select the picture location");
+			File picDir;
+			if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION)
+			{
+				picDir = chooser.getSelectedFile();
+				String[] pics = picDir.list(new FilenameFilter() {
+					
+					@Override
+					public boolean accept(File dir, String name) {
+						return name.matches("[0-9]+\\.jpg");
+					}
+				});
+				Database database;
+				try {
+					database = DatabaseManager.getInstance().getDatabase();
+					for(int i = 0; i < pics.length; i++)
+					{
+						
+						Document doc = database.getExistingDocument("images:frc" + pics[i].replace(".jpg", ""));
+						UnsavedRevision rev = doc.createRevision();
+						BufferedInputStream stream = new BufferedInputStream(new FileInputStream(new File(pics[i])));
+						rev.setAttachment("pic", "image/jpeg", stream);
+						rev.save();
+					}
+				} catch (CouchbaseLiteException | IOException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 	}
 
