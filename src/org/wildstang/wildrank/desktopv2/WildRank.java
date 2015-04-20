@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
@@ -121,37 +122,64 @@ public class WildRank implements ActionListener {
 		}
 		else if(e.getSource().equals(addPictures))
 		{
-			JFileChooser chooser = new JFileChooser();
-			File startFile = new File(System.getProperty("user.home"));
-			chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			chooser.setDialogTitle("Select the picture location");
-			File picDir;
-			if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION)
-			{
-				picDir = chooser.getSelectedFile();
-				String[] pics = picDir.list(new FilenameFilter() {
-					
-					@Override
-					public boolean accept(File dir, String name) {
-						return name.matches("[0-9]+\\.jpg");
-					}
-				});
-				Database database;
-				try {
-					database = DatabaseManager.getInstance().getDatabase();
-					for(int i = 0; i < pics.length; i++)
-					{
-						
-						Document doc = database.getExistingDocument("images:frc" + pics[i].replace(".jpg", ""));
-						UnsavedRevision rev = doc.createRevision();
-						BufferedInputStream stream = new BufferedInputStream(new FileInputStream(new File(pics[i])));
-						rev.setAttachment("pic", "image/jpeg", stream);
-						rev.save();
-					}
-				} catch (CouchbaseLiteException | IOException e1) {
-					e1.printStackTrace();
+			loadPictures();
+		}
+	}
+	
+	public void loadPictures()
+	{	
+		JFileChooser chooser = new JFileChooser();
+		File startFile = new File(System.getProperty("user.home"));
+		chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setDialogTitle("Select the picture location");
+		File picDir;
+		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION)
+		{
+			JFrame loading = new JFrame("WildRank Desktop v2: Picture Loader");
+			JPanel p = new JPanel();
+			JLabel label = new JLabel("Loading...");
+			p.add(label);
+			loading.setLocation(5, 5);
+			loading.setPreferredSize(new Dimension(150, 100));
+			loading.add(p);
+			loading.pack();
+			loading.setVisible(true);
+			
+			picDir = chooser.getSelectedFile();
+			String[] pics = picDir.list(new FilenameFilter() {
+				
+				@Override
+				public boolean accept(File dir, String name) {
+					return name.matches("[0-9]+\\.jpg");
 				}
+			});
+			Database database;
+			try {
+				database = DatabaseManager.getInstance().getDatabase();
+				for(int i = 0; i < pics.length; i++)
+				{
+					String infoString = "Adding: " + pics[i] + " " + Integer.toString(i+1) + "/" + Integer.toString(pics.length);
+					label.setText(infoString);
+					p.revalidate();
+					System.out.print(infoString);
+					String docName = "images:frc" + pics[i].replace(".jpg", "");
+					System.out.println(" to " + docName);
+					Document doc = database.getExistingDocument(docName);
+					if(doc == null)
+					{
+						doc = database.getDocument(docName);
+					}
+					UnsavedRevision rev = doc.createRevision();
+					BufferedInputStream stream = new BufferedInputStream(new FileInputStream(new File(picDir + File.separator + pics[i])));
+					rev.setAttachment("pic", "image/jpeg", stream);
+					rev.save();
+				}
+				System.out.println("Loading pictures completed!");
+				label.setText("Done!");
+				p.revalidate();
+			} catch (CouchbaseLiteException | IOException e1) {
+				e1.printStackTrace();
 			}
 		}
 	}
