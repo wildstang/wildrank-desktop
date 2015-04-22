@@ -65,9 +65,7 @@ public class GetEventData extends JPanel implements ActionListener {
 
 		public void run() {
 			System.out.println("Downloading events...");
-			String json = Utils
-					.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc"
-							+ team.getText() + "/" + year.getText() + "/events");
+			String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/" + year.getText() + "/events");
 			System.out.println("Events Downloaded!" + "\n" + json);
 
 			JSONArray teamEvents = new JSONArray(json);
@@ -81,14 +79,11 @@ public class GetEventData extends JPanel implements ActionListener {
 						List<String> eventStrings = new ArrayList<>();
 						System.out.println("Parsing Events...");
 						for (int i = 0; i < teamEvents.length(); i++) {
-							JSONObject currentEvent = teamEvents
-									.getJSONObject(i);
+							JSONObject currentEvent = teamEvents.getJSONObject(i);
 							eventKeys.add(i, currentEvent.getString("key"));
 							String shortName;
-							if (currentEvent.has("short_name")
-									&& !currentEvent.isNull("short_name")) {
-								shortName = currentEvent
-										.getString("short_name");
+							if (currentEvent.has("short_name") && !currentEvent.isNull("short_name")) {
+								shortName = currentEvent.getString("short_name");
 							} else {
 								shortName = currentEvent.getString("name");
 							}
@@ -118,8 +113,7 @@ public class GetEventData extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(fetch)) {
 			if (eventFetched) {
-				Thread t = new DatabaseCreatorThread(eventKeys.get(events
-						.getSelectedIndex()));
+				Thread t = new DatabaseCreatorThread(eventKeys.get(events.getSelectedIndex()));
 				t.start();
 			} else {
 				eventFetched = true;
@@ -139,12 +133,8 @@ public class GetEventData extends JPanel implements ActionListener {
 		public void run() {
 			System.out.println("Creating database with key: " + eventKey);
 
-			String matches = Utils
-					.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/"
-							+ eventKey + "/matches");
-			String teams = Utils
-					.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/"
-							+ eventKey + "/teams");
+			String matches = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
+			String teams = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/teams");
 
 			try {
 				Database database = DatabaseManager.getInstance().getDatabase();
@@ -155,8 +145,7 @@ public class GetEventData extends JPanel implements ActionListener {
 				for (int i = 0; i < matchesj.length(); i++) {
 					String matchString = matchesj.get(i).toString();
 
-					Map<String, Object> match = new ObjectMapper().readValue(
-							matchString, HashMap.class);
+					Map<String, Object> match = new ObjectMapper().readValue(matchString, HashMap.class);
 					match.put("type", "match");
 					System.out.println("Match " + i + ": " + match.toString());
 					// filter non-qualifying matches
@@ -168,14 +157,12 @@ public class GetEventData extends JPanel implements ActionListener {
 					System.out.println("match key:" + matchKey);
 					String documentName = "match:" + matchKey;
 
-					Document document = database
-							.getExistingDocument(documentName);
+					Document document = database.getExistingDocument(documentName);
 					if (document != null) {
 						System.out.println("Match document exists... clearing");
 					} else {
 						document = database.getDocument(documentName);
-						System.out
-								.println("Match document doesn't exist... creating new document");
+						System.out.println("Match document doesn't exist... creating new document");
 					}
 					UnsavedRevision revision = document.createRevision();
 					revision.setProperties(match);
@@ -185,21 +172,18 @@ public class GetEventData extends JPanel implements ActionListener {
 				for (int i = 0; i < teamsj.length(); i++) {
 					String teamString = teamsj.get(i).toString();
 
-					Map<String, Object> team = new ObjectMapper().readValue(
-							teamString, HashMap.class);
+					Map<String, Object> team = new ObjectMapper().readValue(teamString, HashMap.class);
 					team.put("type", "team");
 					String teamKey = (String) team.get("key");
 					System.out.println("team key:" + teamKey);
 					String documentName = "team:" + teamKey;
 
-					Document document = database
-							.getExistingDocument(documentName);
+					Document document = database.getExistingDocument(documentName);
 					if (document != null) {
 						System.out.println("Team document exists... clearing");
 					} else {
 						document = database.getDocument(documentName);
-						System.out
-								.println("Team document doesn't exist... creating new document");
+						System.out.println("Team document doesn't exist... creating new document");
 					}
 					UnsavedRevision revision = document.createRevision();
 					revision.setProperties(team);
@@ -210,14 +194,12 @@ public class GetEventData extends JPanel implements ActionListener {
 				e.printStackTrace();
 			}
 			try {
-				Query allDocsQuery = DatabaseManager.getInstance()
-						.getDatabase().createAllDocumentsQuery();
+				Query allDocsQuery = DatabaseManager.getInstance().getDatabase().createAllDocumentsQuery();
 				QueryEnumerator result = allDocsQuery.run();
 				for (Iterator<QueryRow> it = result; it.hasNext();) {
 					QueryRow row = it.next();
 					Document doc = row.getDocument();
-					System.out.println("Document contents: "
-							+ doc.getProperties());
+					System.out.println("Document contents: " + doc.getProperties());
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

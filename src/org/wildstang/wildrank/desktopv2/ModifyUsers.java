@@ -32,8 +32,7 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.UnsavedRevision;
 
-public class ModifyUsers extends JPanel implements ActionListener
-{
+public class ModifyUsers extends JPanel implements ActionListener {
 	JButton save;
 	JButton add;
 	JButton read;
@@ -42,8 +41,7 @@ public class ModifyUsers extends JPanel implements ActionListener
 
 	List<UserRow> users = new ArrayList<UserRow>();
 
-	public ModifyUsers()
-	{
+	public ModifyUsers() {
 		setLayout(new GridBagLayout());
 		save = new JButton("Save");
 		save.addActionListener(this);
@@ -51,27 +49,22 @@ public class ModifyUsers extends JPanel implements ActionListener
 		add.addActionListener(this);
 		read = new JButton("Read from CSV");
 		read.addActionListener(this);
-		try
-		{
+		try {
 			loadUsers();
-		}
-		catch (IOException | CouchbaseLiteException e)
-		{
+		} catch (IOException | CouchbaseLiteException e) {
 			e.printStackTrace();
 		}
 		render();
 	}
 
-	public void render()
-	{
+	public void render() {
 		removeAll();
 		c = new GridBagConstraints();
 		add(read, c);
 		c.gridy++;
 		c.gridx = 0;
 		System.out.println("Users: " + users.size());
-		for (int i = 0; i < users.size(); i++)
-		{
+		for (int i = 0; i < users.size(); i++) {
 			c.gridy++;
 			add(users.get(i), c);
 			System.out.println(users.get(i).name.getText() + " (" + c.gridx + ", " + c.gridy + ")");
@@ -83,46 +76,34 @@ public class ModifyUsers extends JPanel implements ActionListener
 		add(save, c);
 	}
 
-	public void loadUsers() throws IOException, CouchbaseLiteException
-	{
+	public void loadUsers() throws IOException, CouchbaseLiteException {
 		Query query = DatabaseManager.getInstance().getAllUsers();
 		QueryEnumerator enumerator = query.run();
 		List<QueryRow> rows = new ArrayList<>();
-		for (Iterator<QueryRow> it = enumerator; it.hasNext();)
-		{
+		for (Iterator<QueryRow> it = enumerator; it.hasNext();) {
 			rows.add(it.next());
 		}
 
-		for (int i = 0; i < rows.size(); i++)
-		{
+		for (int i = 0; i < rows.size(); i++) {
 			Document document = rows.get(i).getDocument();
-			if (document != null)
-			{
+			if (document != null) {
 				Map<String, Object> user = document.getProperties();
 				users.add(new UserRow(new User((String) user.get("id"), (String) user.get("name"), (Boolean) user.get("admin"))));
-			}
-			else
-			{
+			} else {
 				System.out.println("Document is null");
 			}
 		}
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e)
-	{
-		if (e.getSource().equals(add))
-		{
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource().equals(add)) {
 			users.add(new UserRow());
 			render();
 			WildRank.userFrame.pack();
-		}
-		else if (e.getSource().equals(save))
-		{
+		} else if (e.getSource().equals(save)) {
 			save();
-		}
-		else if (e.getSource().equals(read))
-		{
+		} else if (e.getSource().equals(read)) {
 			JFileChooser chooser = new JFileChooser();
 			File startFile = new File(System.getProperty("user.home"));
 			chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
@@ -130,37 +111,28 @@ public class ModifyUsers extends JPanel implements ActionListener
 			chooser.setDialogTitle("Select the Local location");
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV Files", "csv");
 			chooser.setFileFilter(filter);
-			if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			{
+			if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				file = chooser.getSelectedFile();
-				try
-				{
+				try {
 					readFromCSV();
-				}
-				catch (IOException e1)
-				{
+				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-			}
-			else
-			{
+			} else {
 				file = null;
 			}
 			render();
 		}
 	}
 
-	public void save()
-	{
+	public void save() {
 		System.out.println("Creating database of users");
 
-		try
-		{
+		try {
 
 			Database database = DatabaseManager.getInstance().getDatabase();
 
-			for (int i = 0; i < users.size(); i++)
-			{
+			for (int i = 0; i < users.size(); i++) {
 				User user = users.get(i).getUser();
 
 				Map<String, Object> usermap = new HashMap<>();
@@ -175,27 +147,22 @@ public class ModifyUsers extends JPanel implements ActionListener
 				revision.setProperties(usermap);
 				revision.save();
 			}
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	public void readFromCSV() throws IOException
-	{
+	public void readFromCSV() throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		String line;
 		List<String[]> rawUsers = new ArrayList<>();
-		while ((line = br.readLine()) != null)
-		{
+		while ((line = br.readLine()) != null) {
 			rawUsers.add(line.split(","));
 		}
 		br.close();
 		users.clear();
-		for (int i = 0; i < rawUsers.size(); i++)
-		{
+		for (int i = 0; i < rawUsers.size(); i++) {
 			String id = rawUsers.get(i)[0].replace("\"", "");
 			String name = rawUsers.get(i)[1].replace("\"", "");
 			Boolean admin = Boolean.parseBoolean(rawUsers.get(i)[2].replace("\"", ""));

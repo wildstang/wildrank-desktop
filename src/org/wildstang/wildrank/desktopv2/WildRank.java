@@ -46,7 +46,7 @@ public class WildRank implements ActionListener {
 	JButton fixNotes;
 	JButton csv;
 	JButton addPictures;
-	
+
 	static File directory;
 
 	public static void main(String[] args) {
@@ -56,8 +56,7 @@ public class WildRank implements ActionListener {
 	public WildRank() {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
 		users = new JButton("Manage Users");
@@ -90,8 +89,7 @@ public class WildRank implements ActionListener {
 		chooser.setDialogTitle("Select the flash drive location");
 		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
 			directory = chooser.getSelectedFile();
-		}
-		else {
+		} else {
 			directory = null;
 		}
 	}
@@ -106,12 +104,9 @@ public class WildRank implements ActionListener {
 			userFrame.add(scroll);
 			userFrame.pack();
 			userFrame.setVisible(true);
-		}
-		else if (e.getSource().equals(fixNotes)) {
+		} else if (e.getSource().equals(fixNotes)) {
 			fixNotes();
-		}
-		else if(e.getSource().equals(csv))
-		{
+		} else if (e.getSource().equals(csv)) {
 			csvFrame = new JFrame("WildRank Desktop v2: CSV Writer");
 			csvFrame.setPreferredSize(new Dimension(300, 150));
 			csvFrame.setLocation(5, 5);
@@ -120,23 +115,19 @@ public class WildRank implements ActionListener {
 			csvFrame.pack();
 			csvFrame.setVisible(true);
 			csvPanel.run();
-		}
-		else if(e.getSource().equals(addPictures))
-		{
+		} else if (e.getSource().equals(addPictures)) {
 			loadPictures();
 		}
 	}
-	
-	public void loadPictures()
-	{	
+
+	public void loadPictures() {
 		JFileChooser chooser = new JFileChooser();
 		File startFile = new File(System.getProperty("user.home"));
 		chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setDialogTitle("Select the picture location");
 		File picDir;
-		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION)
-		{
+		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
 			JFrame loading = new JFrame("WildRank Desktop v2: Picture Loader");
 			JPanel p = new JPanel();
 			JLabel label = new JLabel("Loading...");
@@ -146,10 +137,10 @@ public class WildRank implements ActionListener {
 			loading.add(p);
 			loading.pack();
 			loading.setVisible(true);
-			
+
 			picDir = chooser.getSelectedFile();
 			String[] pics = picDir.list(new FilenameFilter() {
-				
+
 				@Override
 				public boolean accept(File dir, String name) {
 					return name.matches("[0-9]+\\.jpg");
@@ -158,17 +149,15 @@ public class WildRank implements ActionListener {
 			Database database;
 			try {
 				database = DatabaseManager.getInstance().getDatabase();
-				for(int i = 0; i < pics.length; i++)
-				{
-					String infoString = "Adding: " + pics[i] + " " + Integer.toString(i+1) + "/" + Integer.toString(pics.length);
+				for (int i = 0; i < pics.length; i++) {
+					String infoString = "Adding: " + pics[i] + " " + Integer.toString(i + 1) + "/" + Integer.toString(pics.length);
 					label.setText(infoString);
 					p.revalidate();
 					System.out.print(infoString);
 					String docName = "images:frc" + pics[i].replace(".jpg", "");
 					System.out.println(" to " + docName);
 					Document doc = database.getExistingDocument(docName);
-					if(doc == null)
-					{
+					if (doc == null) {
 						doc = database.getDocument(docName);
 					}
 					UnsavedRevision rev = doc.createRevision();
@@ -220,8 +209,7 @@ public class WildRank implements ActionListener {
 				}
 			}
 			database.endTransaction(true);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
