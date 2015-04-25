@@ -67,6 +67,7 @@ public class WildRank implements ActionListener {
 		csv.addActionListener(this);
 		addPictures = new JButton("Add Pictures");
 		addPictures.addActionListener(this);
+		addPictures.disable();
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
