@@ -20,6 +20,7 @@ public class Utils {
 	 * getJsonFromUrl downloads json from a given url and saves it to the data base
 	 */
 	public static String getJsonFromUrl(String url) {
+		//requests data from tba and tells it which app it is
 		HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpGet httpget = new HttpGet(url);
 		httpget.addHeader("X-TBA-App-Id", "frc111:scouting-system-desktop:v2.0");
@@ -30,11 +31,13 @@ public class Utils {
 			HttpResponse response = httpclient.execute(httpget);
 			HttpEntity entity = response.getEntity();
 
+			//the data is caught
 			inputStream = entity.getContent();
 			// json is UTF-8 by default
 			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
 			StringBuilder sb = new StringBuilder();
 
+			//data is read through and made into a string
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				sb.append(line + "\n");
@@ -50,6 +53,7 @@ public class Utils {
 				e.printStackTrace();
 			}
 		}
+		//the data string is sent back
 		return result;
 	}
 }
