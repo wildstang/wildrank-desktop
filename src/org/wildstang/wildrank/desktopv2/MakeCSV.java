@@ -23,11 +23,16 @@ import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
 
-public class MakeCSV extends JPanel implements ActionListener {
+/*
+ * MakeCSV is a JPanel that shows the progress of creating csv files 
+ */
+public class MakeCSV extends JPanel
+{
 	JLabel progress = new JLabel("Progress");
 	JProgressBar bar = new JProgressBar();
 	Database database;
 
+	//constructed called when panel is added to frame
 	public MakeCSV() {
 		try {
 			database = DatabaseManager.getInstance().getDatabase();
@@ -38,6 +43,7 @@ public class MakeCSV extends JPanel implements ActionListener {
 		add(bar, BorderLayout.SOUTH);
 	}
 
+	//runs the csv writer
 	public void run() {
 		try {
 			writeCSV();
@@ -46,17 +52,14 @@ public class MakeCSV extends JPanel implements ActionListener {
 		}
 	}
 
+	//updates the panel on the progress
 	public void updateProgress(String update, int done, int total) {
 		progress.setText(update);
 		bar.setValue(done);
 		bar.setMaximum(total);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-	}
-
+	//writers the data to csv files
 	public void writeCSV() throws IOException, CouchbaseLiteException {
 		// warning this is sketchy as hell especially with match results
 		Query allDocsQuery = database.createAllDocumentsQuery();
