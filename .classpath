@@ -42,5 +42,7 @@
 	<classpathentry kind="lib" path="libs/lib/stateless4j-2.4.0.jar"/>
 	<classpathentry kind="lib" path="libs/couchbase-lite-java.jar"/>
 	<classpathentry kind="lib" path="libs/jackson-annotations-2.5.0.jar"/>
+	<classpathentry kind="lib" path="libs/okhttp-3.5.0.jar"/>
+	<classpathentry kind="lib" path="libs/okio-1.11.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
