@@ -185,7 +185,6 @@ public class UserManagerPanel extends JPanel implements ActionListener, TableMod
 				revision.save();
 			}
 
-			editedWithoutSaving = false;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -197,6 +196,7 @@ public class UserManagerPanel extends JPanel implements ActionListener, TableMod
 			e.printStackTrace();
 		}
 		updateTable();
+		editedWithoutSaving = false;
 	}
 
 	// creates users and populates the window based on data from a csv file
