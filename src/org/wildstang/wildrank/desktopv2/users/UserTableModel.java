@@ -35,7 +35,16 @@ public class UserTableModel extends AbstractTableModel {
 	
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		return getValueAt(0, columnIndex).getClass();
+		switch (columnIndex) {
+		case COLUMN_NAME_INDEX:
+			return String.class;
+		case COLUMN_ID_INDEX:
+			return String.class;
+		case COLUMN_ADMIN_INDEX:
+			return Boolean.class;
+		default:
+			return null;
+		}
 	}
 
 	@Override

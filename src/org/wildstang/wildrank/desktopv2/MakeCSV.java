@@ -159,10 +159,10 @@ public class MakeCSV extends JPanel {
 									}
 								}
 							}
-							prop = props.next();
 						} else {
 							System.out.println(doc.getProperty("type") + ": " + key + " is null");
 						}
+						prop = props.next();
 					}
 					bw.write("\n");
 					bw.flush();
