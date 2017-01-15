@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,22 +13,23 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import org.wildstang.wildrank.desktopv2.users.UserManager;
+import org.wildstang.wildrank.desktopv2.users.UserManagerPanel;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
@@ -38,16 +41,15 @@ import com.couchbase.lite.TransactionalTask;
 import com.couchbase.lite.UnsavedRevision;
 
 public class WildRank implements ActionListener {
-	static JFrame frame;
-	static JFrame userFrame;
-	static JFrame csvFrame;
+	private static JFrame frame;
+	private static JFrame csvFrame;
+	
+	private UserManager userManager;
 
-	JPanel panel;
-	JButton users;
-	JButton csv;
-	JButton addPictures;
-
-	static File directory;
+	private JPanel panel;
+	private JButton users;
+	private JButton csv;
+	private JButton addPictures;
 
 	public static void main(String[] args) {
 		new WildRank();
@@ -55,74 +57,74 @@ public class WildRank implements ActionListener {
 
 	public WildRank() {
 		try {
-			//makes the windows look native to whatever os you are on
+			// makes the windows look native to whatever os you are on
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
 
-		//immediately prompts for database location
-		JFileChooser chooser = new JFileChooser();
-		File startFile = new File(System.getProperty("user.home"));
-		chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setDialogTitle("Select the flash drive location");
-		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
-			directory = chooser.getSelectedFile();
-		} else {
-			directory = null;
+		// Immediately prompt for database location
+		File directory = null;
+		while (directory == null) {
+			JFileChooser chooser = new JFileChooser();
+			File startFile = new File(System.getProperty("user.home"));
+			chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			chooser.setDialogTitle("Select the flash drive location");
+			if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
+				directory = chooser.getSelectedFile();
+			} else {
+				JOptionPane.showMessageDialog(null, "You must select a directory.", "Error!", JOptionPane.ERROR_MESSAGE);
+			}
 		}
-		
-		//button to add or edit users
+		DatabaseManager.setDirectory(directory);
+
+		// button to add or edit users
 		users = new JButton("Manage Users");
 		users.addActionListener(this);
-		
-		//button to save data into csv
+
+		// button to save data into csv
 		csv = new JButton("Write CSV");
 		csv.addActionListener(this);
-		
-		//button to attach pictures to team documents
+
+		// button to attach pictures to team documents
 		addPictures = new JButton("Add Pictures");
 		addPictures.addActionListener(this);
-		//its disabled because it kills the app
+		// its disabled because it kills the app
 		addPictures.setEnabled(false);
-		
-		//basic window setup
+
+		// basic window setup
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLocationRelativeTo(null);
 		frame.setPreferredSize(new Dimension(300, 150));
-		
-		//lines up everything in the window
+
+		// lines up everything in the window
 		JPanel top = new JPanel();
 		top.add(addPictures, BorderLayout.WEST);
 		top.add(csv, BorderLayout.EAST);
 		frame.add(top, BorderLayout.PAGE_START);
 		frame.add(panel, BorderLayout.CENTER);
 		frame.add(users, BorderLayout.PAGE_END);
-		
-		//final setup of window
+
+		// final setup of window
 		frame.pack();
+		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		//defines what happens when buttons are pressed
+		// defines what happens when buttons are pressed
 		if (e.getSource().equals(users)) {
-			//when the "Manage Users" button is pressed
-			//a new window is created and contains the ModifyUsers panel
-			userFrame = new JFrame("WildRank Desktop v2: User Manager");
-			userFrame.setPreferredSize(new Dimension(400, 700));
-			userFrame.setLocation(5, 5);
-			JScrollPane scroll = new JScrollPane(new ModifyUsers());
-			userFrame.add(scroll);
-			userFrame.pack();
-			userFrame.setVisible(true);
+			if (userManager == null) {
+				userManager = new UserManager();
+			}
+			userManager.show();
 		} else if (e.getSource().equals(csv)) {
-			//when the "Write CSV" button is pressed
-			//a new window is created and contains the MakeCSV panel
+			// when the "Write CSV" button is pressed
+			// a new window is created and contains the MakeCSV panel
 			csvFrame = new JFrame("WildRank Desktop v2: CSV Writer");
 			csvFrame.setPreferredSize(new Dimension(300, 150));
 			csvFrame.setLocation(5, 5);
@@ -132,24 +134,24 @@ public class WildRank implements ActionListener {
 			csvFrame.setVisible(true);
 			csvPanel.run();
 		} else if (e.getSource().equals(addPictures)) {
-			//when the "Add Pictures" button is pressed
-			//the pictures are attached to respective documents
+			// when the "Add Pictures" button is pressed
+			// the pictures are attached to respective documents
 			loadPictures();
 		}
 	}
 
-	//called when the "Add Pictures button is pressed
+	// called when the "Add Pictures button is pressed
 	public void loadPictures() {
-		//user is prompted to define where the pictures are located
+		// user is prompted to define where the pictures are located
 		JFileChooser chooser = new JFileChooser();
 		File startFile = new File(System.getProperty("user.home"));
 		chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setDialogTitle("Select the picture location");
 		File picDir;
-		//if a directory is chosen
+		// if a directory is chosen
 		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
-			//a new frame is created that shows status
+			// a new frame is created that shows status
 			JFrame loading = new JFrame("WildRank Desktop v2: Picture Loader");
 			JPanel p = new JPanel();
 			JLabel label = new JLabel("Loading...");
@@ -160,7 +162,8 @@ public class WildRank implements ActionListener {
 			loading.pack();
 			loading.setVisible(true);
 
-			//sorts through all pictures and only stores the ones that only have numbers in their names
+			// sorts through all pictures and only stores the ones that only
+			// have numbers in their names
 			picDir = chooser.getSelectedFile();
 			String[] pics = picDir.list(new FilenameFilter() {
 
@@ -169,28 +172,30 @@ public class WildRank implements ActionListener {
 					return name.matches("[0-9]+\\.jpg");
 				}
 			});
-			
+
 			Database database;
 			try {
-				//the database is accessed
+				// the database is accessed
 				database = DatabaseManager.getInstance().getDatabase();
 				for (int i = 0; i < pics.length; i++) {
-					//the team number is extracted from the name
-					String infoString = "Adding: " + pics[i] + " " + Integer.toString(i + 1) + "/" + Integer.toString(pics.length);
+					// the team number is extracted from the name
+					String infoString = "Adding: " + pics[i] + " " + Integer.toString(i + 1) + "/"
+							+ Integer.toString(pics.length);
 					label.setText(infoString);
 					p.revalidate();
 					System.out.print(infoString);
-					//a document name is created with the team number
+					// a document name is created with the team number
 					String docName = "images:frc" + pics[i].replace(".jpg", "");
 					System.out.println(" to " + docName);
-					//a document is created with the name
+					// a document is created with the name
 					Document doc = database.getExistingDocument(docName);
 					if (doc == null) {
 						doc = database.getDocument(docName);
 					}
-					//a revision is created which has the image attached to it
+					// a revision is created which has the image attached to it
 					UnsavedRevision rev = doc.createRevision();
-					BufferedInputStream stream = new BufferedInputStream(new FileInputStream(new File(picDir + File.separator + pics[i])));
+					BufferedInputStream stream = new BufferedInputStream(
+							new FileInputStream(new File(picDir + File.separator + pics[i])));
 					rev.setAttachment("pic", "image/jpeg", stream);
 					rev.save();
 				}
@@ -203,7 +208,7 @@ public class WildRank implements ActionListener {
 		}
 	}
 
-	//used when we had duplicate notes being made shouldn't be needed anymore
+	// used when we had duplicate notes being made shouldn't be needed anymore
 	private void fixNotes() {
 		try {
 			Database database = DatabaseManager.getInstance().getDatabase();
@@ -213,7 +218,7 @@ public class WildRank implements ActionListener {
 			BufferedWriter bw = new BufferedWriter(new FileWriter("doc.txt"));
 
 			database.runInTransaction(new TransactionalTask() {
-				
+
 				@Override
 				public boolean run() {
 					try {
@@ -231,11 +236,11 @@ public class WildRank implements ActionListener {
 											newNotes.add(note);
 										}
 									}
-	
+
 									Map<String, Object> newProps = new HashMap<String, Object>(doc.getProperties());
 									newProps.remove("notes");
 									newProps.put("notes", newNotes);
-	
+
 									UnsavedRevision revision = doc.createRevision();
 									revision.setProperties(newProps);
 									revision.save();
@@ -246,10 +251,10 @@ public class WildRank implements ActionListener {
 						e.printStackTrace();
 						return false;
 					}
-					
+
 					return true;
 				}
-			});			
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

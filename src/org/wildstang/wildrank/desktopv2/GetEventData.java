@@ -41,9 +41,10 @@ public class GetEventData extends JPanel implements ActionListener {
 
 	List<String> eventKeys = new ArrayList<>();
 
-	//constructor that is called when adding it to its JFrame
+	// constructor that is called when adding it to its JFrame
 	public GetEventData() {
-		//the panel contains 2 textfields for year and team as well as a button to fetch the data
+		// the panel contains 2 textfields for year and team as well as a button
+		// to fetch the data
 		// and jlabels to label all the things
 		year = new JTextField(4);
 		team = new JTextField(4);
@@ -56,16 +57,19 @@ public class GetEventData extends JPanel implements ActionListener {
 		add(fetch);
 	}
 
-	//run to get all the events the team is attending in a certain year
+	// run to get all the events the team is attending in a certain year
 	public class EventFetcherThread extends Thread {
 
+		@Override
 		public void run() {
 			System.out.println("Downloading events...");
-			//gets the json (as a string) from the blue alliance for the entered team's events in the entered year
-			String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/" + year.getText() + "/events");
+			// gets the json (as a string) from the blue alliance for the
+			// entered team's events in the entered year
+			String json = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/team/frc" + team.getText() + "/"
+					+ year.getText() + "/events");
 			System.out.println("Events Downloaded!" + "\n" + json);
 
-			//creates a json array based off the string gotten from tba
+			// creates a json array based off the string gotten from tba
 			JSONArray teamEvents = new JSONArray(json);
 			try {
 				SwingUtilities.invokeLater(new Runnable() {
@@ -73,11 +77,12 @@ public class GetEventData extends JPanel implements ActionListener {
 					@Override
 					public void run() {
 						System.out.println("Clearing Panel.");
-						//clears the panel
+						// clears the panel
 						removeAll();
 						List<String> eventStrings = new ArrayList<>();
 						System.out.println("Parsing Events...");
-						//parses through all the events from the json and adds the events shortName to an arraylist
+						// parses through all the events from the json and adds
+						// the events shortName to an arraylist
 						for (int i = 0; i < teamEvents.length(); i++) {
 							JSONObject currentEvent = teamEvents.getJSONObject(i);
 							eventKeys.add(i, currentEvent.getString("key"));
@@ -93,16 +98,16 @@ public class GetEventData extends JPanel implements ActionListener {
 						events.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 						events.setLayoutOrientation(JList.VERTICAL_WRAP);
 						events.setVisibleRowCount(-1);
-						//adds the event shortNames to a new scroll-able panel
+						// adds the event shortNames to a new scroll-able panel
 						JScrollPane listScroller = new JScrollPane(events);
 						listScroller.setPreferredSize(new Dimension(280, 35));
 						listScroller.setViewportView(events);
 						System.out.println("Events Parsed!");
-						//changes the fetch button to download
+						// changes the fetch button to download
 						fetch.setText("Download");
 						add(listScroller);
 						add(fetch);
-						//redraws the window
+						// redraws the window
 						GetEventData.this.revalidate();
 					}
 				});
@@ -114,15 +119,15 @@ public class GetEventData extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		//defines what happens when buttons are pressed
+		// defines what happens when buttons are pressed
 		if (e.getSource().equals(fetch)) {
-			//when the "Fetch Events" or "Download" button is pressed
+			// when the "Fetch Events" or "Download" button is pressed
 			if (eventFetched) {
-				//if data has already been fetched get the event data
+				// if data has already been fetched get the event data
 				Thread t = new DatabaseCreatorThread(eventKeys.get(events.getSelectedIndex()));
 				t.start();
 			} else {
-				//if data hasn't been fetched, fetch it
+				// if data hasn't been fetched, fetch it
 				eventFetched = true;
 				Thread t = new EventFetcherThread();
 				t.start();
@@ -130,7 +135,7 @@ public class GetEventData extends JPanel implements ActionListener {
 		}
 	}
 
-	//used to get the data for the chosen event
+	// used to get the data for the chosen event
 	public class DatabaseCreatorThread extends Thread {
 		String eventKey = "";
 
@@ -138,25 +143,27 @@ public class GetEventData extends JPanel implements ActionListener {
 			this.eventKey = eventKey;
 		}
 
+		@Override
 		public void run() {
 			System.out.println("Creating database with key: " + eventKey);
 
-			//gets the match and team json from the blue alliance as a string
-			String matches = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
+			// gets the match and team json from the blue alliance as a string
+			String matches = Utils
+					.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/matches");
 			String teams = Utils.getJsonFromUrl("http://www.thebluealliance.com/api/v2/event/" + eventKey + "/teams");
 
 			try {
-				//gets the database
+				// gets the database
 				Database database = DatabaseManager.getInstance().getDatabase();
 
-				//creates json arrays based off the strings from tba
+				// creates json arrays based off the strings from tba
 				JSONArray matchesj = new JSONArray(matches);
 				JSONArray teamsj = new JSONArray(teams);
 
-				//parses through all the matches
+				// parses through all the matches
 				for (int i = 0; i < matchesj.length(); i++) {
 					String matchString = matchesj.get(i).toString();
-					//creates a map of all the data from the match
+					// creates a map of all the data from the match
 					Map<String, Object> match = new ObjectMapper().readValue(matchString, HashMap.class);
 					match.put("type", "match");
 					System.out.println("Match " + i + ": " + match.toString());
@@ -165,12 +172,13 @@ public class GetEventData extends JPanel implements ActionListener {
 						System.out.println("Non-qual match!");
 						continue;
 					}
-					//gets the match key and creates the document name based off it
+					// gets the match key and creates the document name based
+					// off it
 					String matchKey = (String) match.get("key");
 					System.out.println("match key:" + matchKey);
 					String documentName = "match:" + matchKey;
 
-					//finds the document or creates it if it doesn't exist
+					// finds the document or creates it if it doesn't exist
 					Document document = database.getExistingDocument(documentName);
 					if (document != null) {
 						System.out.println("Match document exists... clearing");
@@ -178,25 +186,26 @@ public class GetEventData extends JPanel implements ActionListener {
 						document = database.getDocument(documentName);
 						System.out.println("Match document doesn't exist... creating new document");
 					}
-					
-					//saves the data to the document as a revision
+
+					// saves the data to the document as a revision
 					UnsavedRevision revision = document.createRevision();
 					revision.setProperties(match);
 					revision.save();
 				}
 
-				//parses through all the teams
+				// parses through all the teams
 				for (int i = 0; i < teamsj.length(); i++) {
 					String teamString = teamsj.get(i).toString();
-					//creates a map of all the data for the team
+					// creates a map of all the data for the team
 					Map<String, Object> team = new ObjectMapper().readValue(teamString, HashMap.class);
 					team.put("type", "team");
-					//gets the team key and creates the document name based off it
+					// gets the team key and creates the document name based off
+					// it
 					String teamKey = (String) team.get("key");
 					System.out.println("team key:" + teamKey);
 					String documentName = "team:" + teamKey;
 
-					//finds the document or creates it if it doesn't exist
+					// finds the document or creates it if it doesn't exist
 					Document document = database.getExistingDocument(documentName);
 					if (document != null) {
 						System.out.println("Team document exists... clearing");
@@ -204,8 +213,8 @@ public class GetEventData extends JPanel implements ActionListener {
 						document = database.getDocument(documentName);
 						System.out.println("Team document doesn't exist... creating new document");
 					}
-					
-					//saves the data to the document as a revision
+
+					// saves the data to the document as a revision
 					UnsavedRevision revision = document.createRevision();
 					revision.setProperties(team);
 					revision.save();
@@ -215,17 +224,16 @@ public class GetEventData extends JPanel implements ActionListener {
 				e.printStackTrace();
 			}
 			try {
-				//prints all the documents in the console
+				// prints all the documents in the console
 				DatabaseManager.getInstance().printAllDocuments();
 			} catch (CouchbaseLiteException | IOException e) {
 				e.printStackTrace();
 			}
 
-			//says it's done
+			// says it's done
 			System.out.println("Done!");
 			removeAll();
 			add(new JLabel("Done!"));
-			WildRank.frame.pack();
 			GetEventData.this.revalidate();
 		}
 	}

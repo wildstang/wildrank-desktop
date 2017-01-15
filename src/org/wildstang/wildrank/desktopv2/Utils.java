@@ -11,15 +11,14 @@ import okhttp3.Response;
  */
 public class Utils {
 	/*
-	 * getJsonFromUrl downloads json from a given url and saves it to the data base
+	 * getJsonFromUrl downloads json from a given url and saves it to the data
+	 * base
 	 */
 	public static String getJsonFromUrl(String url) {
 		OkHttpClient client = new OkHttpClient();
-		
-		Request request = new Request.Builder()
-				.url(url)
-				.addHeader("X-TBA-App-Id", "frc111:scouting-system-desktop:v2.0")
-				.build();
+
+		Request request = new Request.Builder().url(url)
+				.addHeader("X-TBA-App-Id", "frc111:scouting-system-desktop:v2.0").build();
 		try {
 			Response response = client.newCall(request).execute();
 			return response.body().string();
