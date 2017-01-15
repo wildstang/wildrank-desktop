@@ -79,7 +79,7 @@ public class DatabaseManager {
 	}
 
 	//saves the state of the database to file
-	public void saveDatabase() {
+	public void saveDatabase() throws CouchbaseLiteException {
 		database.close();
 		database.open();
 	}

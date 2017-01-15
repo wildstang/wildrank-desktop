@@ -34,6 +34,7 @@ import com.couchbase.lite.Document;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.TransactionalTask;
 import com.couchbase.lite.UnsavedRevision;
 
 public class WildRank implements ActionListener {
@@ -211,33 +212,44 @@ public class WildRank implements ActionListener {
 			QueryEnumerator result = allDocsQuery.run();
 			BufferedWriter bw = new BufferedWriter(new FileWriter("doc.txt"));
 
-			database.beginTransaction();
-			for (Iterator<QueryRow> it = result; it.hasNext();) {
-				QueryRow row = it.next();
-				Document doc = row.getDocument();
-				String type = (String) doc.getProperty("type");
-				if (type != null) {
-					if (type.equals("notes")) {
-						// We need to fix this note
-						List<String> notes = (List<String>) doc.getProperty("notes");
-						List<String> newNotes = new ArrayList<>();
-						for (String note : notes) {
-							if (!newNotes.contains(note)) {
-								newNotes.add(note);
+			database.runInTransaction(new TransactionalTask() {
+				
+				@Override
+				public boolean run() {
+					try {
+						for (Iterator<QueryRow> it = result; it.hasNext();) {
+							QueryRow row = it.next();
+							Document doc = row.getDocument();
+							String type = (String) doc.getProperty("type");
+							if (type != null) {
+								if (type.equals("notes")) {
+									// We need to fix this note
+									List<String> notes = (List<String>) doc.getProperty("notes");
+									List<String> newNotes = new ArrayList<>();
+									for (String note : notes) {
+										if (!newNotes.contains(note)) {
+											newNotes.add(note);
+										}
+									}
+	
+									Map<String, Object> newProps = new HashMap<String, Object>(doc.getProperties());
+									newProps.remove("notes");
+									newProps.put("notes", newNotes);
+	
+									UnsavedRevision revision = doc.createRevision();
+									revision.setProperties(newProps);
+									revision.save();
+								}
 							}
 						}
-
-						Map<String, Object> newProps = new HashMap<String, Object>(doc.getProperties());
-						newProps.remove("notes");
-						newProps.put("notes", newNotes);
-
-						UnsavedRevision revision = doc.createRevision();
-						revision.setProperties(newProps);
-						revision.save();
+					} catch (CouchbaseLiteException e) {
+						e.printStackTrace();
+						return false;
 					}
+					
+					return true;
 				}
-			}
-			database.endTransaction(true);
+			});			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

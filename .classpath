@@ -30,19 +30,14 @@
 	<classpathentry kind="lib" path="libs/jackson-core-asl-1.9.2.jar"/>
 	<classpathentry kind="lib" path="libs/jackson-mapper-asl-1.9.2.jar"/>
 	<classpathentry kind="lib" path="libs/commons-io-2.0.1.jar"/>
-	<classpathentry kind="lib" path="libs/lib/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="libs/lib/commons-logging-1.1.3.jar"/>
-	<classpathentry kind="lib" path="libs/lib/couchbase-lite-java-core.jar" sourcepath="libs/couchbase-lite-java-core-master-sources.jar"/>
-	<classpathentry kind="lib" path="libs/lib/couchbase-lite-java-native.jar"/>
-	<classpathentry kind="lib" path="libs/lib/httpclient-4.0-beta1.jar"/>
-	<classpathentry kind="lib" path="libs/lib/httpcore-4.0-beta2.jar"/>
-	<classpathentry kind="lib" path="libs/lib/jackson-core-asl-1.9.2.jar"/>
-	<classpathentry kind="lib" path="libs/lib/jackson-mapper-asl-1.9.2.jar"/>
-	<classpathentry kind="lib" path="libs/lib/json-20090211.jar"/>
-	<classpathentry kind="lib" path="libs/lib/stateless4j-2.4.0.jar"/>
-	<classpathentry kind="lib" path="libs/couchbase-lite-java.jar"/>
 	<classpathentry kind="lib" path="libs/jackson-annotations-2.5.0.jar"/>
 	<classpathentry kind="lib" path="libs/okhttp-3.5.0.jar"/>
 	<classpathentry kind="lib" path="libs/okio-1.11.0.jar"/>
+	<classpathentry kind="lib" path="libs/couchbase-lite-java-1.3.1.jar"/>
+	<classpathentry kind="lib" path="libs/couchbase-lite-java-core-1.3.1.jar" sourcepath="libs/couchbase-lite-java-core-master-sources.jar"/>
+	<classpathentry kind="lib" path="libs/couchbase-lite-java-core-master-sources.jar"/>
+	<classpathentry kind="lib" path="libs/couchbase-lite-java-forestdb-1.3.1.jar"/>
+	<classpathentry kind="lib" path="libs/couchbase-lite-java-sqlcipher-1.3.1.jar"/>
+	<classpathentry kind="lib" path="libs/couchbase-lite-java-sqlite-custom-1.3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
