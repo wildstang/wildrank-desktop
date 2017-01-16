@@ -70,6 +70,10 @@ public class UserTableModel extends AbstractTableModel {
 	
 	@Override
 	public void setValueAt(Object value, int rowIndex, int columnIndex) {
+		if (rowIndex < 0 || rowIndex >= users.size()) {
+			return;
+		}
+		
 		User user = users.get(rowIndex);
 		switch (columnIndex) {
 		case COLUMN_NAME_INDEX:

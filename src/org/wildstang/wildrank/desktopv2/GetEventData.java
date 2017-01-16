@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -96,11 +97,11 @@ public class GetEventData extends JPanel implements ActionListener {
 						}
 						events = new JList(eventStrings.toArray());
 						events.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-						events.setLayoutOrientation(JList.VERTICAL_WRAP);
+						events.setLayoutOrientation(JList.VERTICAL);
 						events.setVisibleRowCount(-1);
 						// adds the event shortNames to a new scroll-able panel
 						JScrollPane listScroller = new JScrollPane(events);
-						listScroller.setPreferredSize(new Dimension(280, 35));
+						listScroller.setPreferredSize(new Dimension(200, 100));
 						listScroller.setViewportView(events);
 						System.out.println("Events Parsed!");
 						// changes the fetch button to download
@@ -109,6 +110,7 @@ public class GetEventData extends JPanel implements ActionListener {
 						add(fetch);
 						// redraws the window
 						GetEventData.this.revalidate();
+						((JFrame) SwingUtilities.getWindowAncestor(GetEventData.this)).pack();
 					}
 				});
 			} catch (JSONException e) {
