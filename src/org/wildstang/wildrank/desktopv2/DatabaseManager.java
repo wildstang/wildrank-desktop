@@ -48,6 +48,17 @@ public class DatabaseManager {
 		// then return the current one
 		return instance;
 	}
+	
+	/**
+	 * Releases all databases that were opened by this instance. Used to prep the
+	 * flash drive before ejecting.
+	 */
+	public static void disposeInstance() {
+		if (instance != null) {
+			instance.manager.close();
+		}
+		instance = null;
+	}
 
 	// constructor used to setup the database manager when getInstance() is
 	// called for the first time

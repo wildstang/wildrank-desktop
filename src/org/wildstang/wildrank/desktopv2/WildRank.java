@@ -2,10 +2,9 @@ package org.wildstang.wildrank.desktopv2;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,7 +28,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.wildstang.wildrank.desktopv2.users.UserManager;
-import org.wildstang.wildrank.desktopv2.users.UserManagerPanel;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
@@ -50,6 +48,7 @@ public class WildRank implements ActionListener {
 	private JButton users;
 	private JButton csv;
 	private JButton addPictures;
+	private JButton eject;
 
 	public static void main(String[] args) {
 		new WildRank();
@@ -93,20 +92,25 @@ public class WildRank implements ActionListener {
 		addPictures.addActionListener(this);
 		// its disabled because it kills the app
 		addPictures.setEnabled(false);
+		
+		eject = new JButton("Close database to eject");
+		eject.addActionListener(this);
 
 		// basic window setup
 		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setPreferredSize(new Dimension(300, 150));
 
 		// lines up everything in the window
 		JPanel top = new JPanel();
-		top.add(addPictures, BorderLayout.WEST);
-		top.add(csv, BorderLayout.EAST);
-		frame.add(top, BorderLayout.PAGE_START);
-		frame.add(panel, BorderLayout.CENTER);
-		frame.add(users, BorderLayout.PAGE_END);
+		top.setLayout(new GridLayout(0, 1));
+		top.add(users);
+		top.add(addPictures);
+		top.add(csv);
+		top.add(eject);
+		
+		frame.add(panel, BorderLayout.PAGE_START);
+		frame.add(top, BorderLayout.CENTER);
 
 		// final setup of window
 		frame.pack();
@@ -137,6 +141,14 @@ public class WildRank implements ActionListener {
 			// when the "Add Pictures" button is pressed
 			// the pictures are attached to respective documents
 			loadPictures();
+		} else if (e.getSource().equals(eject)) {
+			try {
+				DatabaseManager.disposeInstance();
+				JOptionPane.showMessageDialog(null, "Databse closed successfully.", "Success!", JOptionPane.INFORMATION_MESSAGE);
+			} catch (Exception exception) {
+				exception.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Database did not close properly.", "Error!", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 	}
 
