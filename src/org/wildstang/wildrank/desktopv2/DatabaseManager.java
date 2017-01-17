@@ -89,6 +89,10 @@ public class DatabaseManager {
 	public Database getDatabase() {
 		return database;
 	}
+	
+	public File getDatabaseDirectory() {
+		return directory;
+	}
 
 	// returns a query of all the users
 	public Query getAllUsers() {

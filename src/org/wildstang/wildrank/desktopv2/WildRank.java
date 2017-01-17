@@ -1,6 +1,8 @@
 package org.wildstang.wildrank.desktopv2;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -19,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -26,6 +29,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -46,7 +50,7 @@ public class WildRank implements ActionListener {
 	
 	private UserManager userManager;
 
-	private JPanel panel;
+	private JPanel event;
 	private JButton users;
 	private JButton csv;
 	private JButton addPictures;
@@ -73,13 +77,16 @@ public class WildRank implements ActionListener {
 			chooser.setCurrentDirectory(chooser.getFileSystemView().getParentDirectory(startFile));
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			chooser.setDialogTitle("Select the flash drive location");
-			if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
+			if (chooser.showOpenDialog(event) == JFileChooser.APPROVE_OPTION) {
 				directory = chooser.getSelectedFile();
 			} else {
 				JOptionPane.showMessageDialog(null, "You must select a directory.", "Error!", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		DatabaseManager.setDirectory(directory);
+		
+		JLabel directoryLabel = new JLabel("Directory: " + directory.getAbsolutePath(), SwingConstants.CENTER);
+		directoryLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 		// button to add or edit users
 		users = new JButton("Manage Users");
@@ -98,24 +105,25 @@ public class WildRank implements ActionListener {
 		eject = new JButton("Close database to eject");
 		eject.addActionListener(this);
 
-		// basic window setup
-		panel = new GetEventData();
+		event = new GetEventData();
 
-		JPanel top = new JPanel();
-		top.setLayout(new GridLayout(0, 1));
-		top.add(users);
-		top.add(addPictures);
-		top.add(csv);
-		top.add(eject);
+		JPanel buttons = new JPanel();
+		buttons.setLayout(new GridLayout(0, 1));
+		buttons.add(users);
+		buttons.add(addPictures);
+		buttons.add(csv);
+		buttons.add(eject);
 		
 		frame = new JFrame("WildRank Desktop v2");
 		Container contentPane = frame.getContentPane();
 		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
-		frame.add(panel);
-		frame.add(top);
+		frame.add(event);
+		frame.add(buttons);
+		frame.add(directoryLabel);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(false);
 		frame.setVisible(true);
 	}
 
@@ -163,7 +171,7 @@ public class WildRank implements ActionListener {
 		chooser.setDialogTitle("Select the picture location");
 		File picDir;
 		// if a directory is chosen
-		if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
+		if (chooser.showOpenDialog(event) == JFileChooser.APPROVE_OPTION) {
 			// a new frame is created that shows status
 			JFrame loading = new JFrame("WildRank Desktop v2: Picture Loader");
 			JPanel p = new JPanel();
