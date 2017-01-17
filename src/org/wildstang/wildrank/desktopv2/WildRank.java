@@ -1,6 +1,7 @@
 package org.wildstang.wildrank.desktopv2;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -18,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -97,11 +99,8 @@ public class WildRank implements ActionListener {
 		eject.addActionListener(this);
 
 		// basic window setup
-		frame = new JFrame("WildRank Desktop v2");
 		panel = new GetEventData();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		// lines up everything in the window
 		JPanel top = new JPanel();
 		top.setLayout(new GridLayout(0, 1));
 		top.add(users);
@@ -109,12 +108,14 @@ public class WildRank implements ActionListener {
 		top.add(csv);
 		top.add(eject);
 		
-		frame.add(panel, BorderLayout.PAGE_START);
-		frame.add(top, BorderLayout.CENTER);
-
-		// final setup of window
+		frame = new JFrame("WildRank Desktop v2");
+		Container contentPane = frame.getContentPane();
+		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
+		frame.add(panel);
+		frame.add(top);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
 
