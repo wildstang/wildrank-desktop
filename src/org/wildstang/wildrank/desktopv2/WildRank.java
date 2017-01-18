@@ -1,7 +1,5 @@
 package org.wildstang.wildrank.desktopv2;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -21,7 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -80,7 +77,11 @@ public class WildRank implements ActionListener {
 			if (chooser.showOpenDialog(event) == JFileChooser.APPROVE_OPTION) {
 				directory = chooser.getSelectedFile();
 			} else {
-				JOptionPane.showMessageDialog(null, "You must select a directory.", "Error!", JOptionPane.ERROR_MESSAGE);
+				String[] options = {"Try again", "Exit"};
+				int result = JOptionPane.showOptionDialog(null, "You must select a directory.", "Error!", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+				if (result == JOptionPane.NO_OPTION) {
+					System.exit(0);
+				}
 			}
 		}
 		DatabaseManager.setDirectory(directory);
